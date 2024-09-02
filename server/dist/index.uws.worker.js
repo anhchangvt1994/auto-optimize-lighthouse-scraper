@@ -72,7 +72,7 @@ const startServer = async () => {
 	if (isMainThread) {
 		let port =
 			_InitEnv.PROCESS_ENV.PORT || _InitEnv.ENV_MODE === 'production'
-				? 8080
+				? _InitEnv.PROCESS_ENV.PORT || 8080
 				: _PortHandler.getPort.call(void 0, 'PUPPETEER_SSR_PORT')
 
 		if (!port) {
@@ -164,14 +164,14 @@ const startServer = async () => {
 			workerData: { order: 3, port: 4042 },
 		})
 		_createWorkerListener(worker3)
-		// const worker4 = new Worker(__filename, {
-		// 	workerData: { order: 4, port: 4043 },
-		// })
-		// _createWorkerListener(worker4)
-		// const worker5 = new Worker(__filename, {
-		// 	workerData: { order: 5, port: 4044 },
-		// })
-		// _createWorkerListener(worker5)
+		const worker4 = new Worker(__filename, {
+			workerData: { order: 4, port: 4043 },
+		})
+		_createWorkerListener(worker4)
+		const worker5 = new Worker(__filename, {
+			workerData: { order: 5, port: 4044 },
+		})
+		_createWorkerListener(worker5)
 	} else {
 		const setupCors = (res) => {
 			res
