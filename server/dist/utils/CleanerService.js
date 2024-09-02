@@ -32,16 +32,21 @@ const workerManager = (() => {
 		),
 		{
 			minWorkers: 1,
-			maxWorkers: 4,
+			maxWorkers: 5,
 		},
-		['scanToCleanBrowsers', 'scanToCleanPages', 'scanToCleanAPIDataCache']
+		[
+			'scanToCleanBrowsers',
+			'scanToCleanPages',
+			'scanToCleanAPIDataCache',
+			'deleteResource',
+		]
 	)
 })()
 
 const CleanerService = async (force = false) => {
 	if (isFirstInitCompleted && !force) return
 	if (
-		!process.env.PUPPETEER_SKIP_DOWNLOAD ||
+		!process.env.PUPPETEER_SKIP_DOWNLOAD &&
 		!_constants3.canUseLinuxChromium
 	) {
 		if (!workerManager) return
@@ -190,6 +195,31 @@ const CleanerService = async (force = false) => {
 	}
 
 	cleanAPIStoreCache()
+
+	// NOTE - Other cleaner
+	const cleanOther = async () => {
+		if (!workerManager) return
+
+		const clean = async (path) => {
+			if (!path) return
+
+			const freePool = await workerManager.getFreePool()
+			const pool = freePool.pool
+
+			return pool.exec('deleteResource', [path])
+		}
+
+		try {
+			await Promise.all([
+				clean(`${_constants.userDataPath}/wsEndpoint.txt`),
+				clean(`${_constants.workerManagerPath}/counter.txt`),
+			])
+		} catch (err) {
+			_ConsoleHandler2.default.error(err)
+		}
+	}
+
+	cleanOther()
 
 	isFirstInitCompleted = true
 }

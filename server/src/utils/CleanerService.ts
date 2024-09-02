@@ -7,6 +7,7 @@ import {
 	resourceExtension,
 	storePath,
 	userDataPath,
+	workerManagerPath,
 } from '../constants'
 import { canUseLinuxChromium, chromiumPath } from '../puppeteer-ssr/constants'
 import ServerConfig from '../server.config'
@@ -28,15 +29,20 @@ const workerManager = (() => {
 		),
 		{
 			minWorkers: 1,
-			maxWorkers: 4,
+			maxWorkers: 5,
 		},
-		['scanToCleanBrowsers', 'scanToCleanPages', 'scanToCleanAPIDataCache']
+		[
+			'scanToCleanBrowsers',
+			'scanToCleanPages',
+			'scanToCleanAPIDataCache',
+			'deleteResource',
+		]
 	)
 })()
 
 const CleanerService = async (force = false) => {
 	if (isFirstInitCompleted && !force) return
-	if (!process.env.PUPPETEER_SKIP_DOWNLOAD || !canUseLinuxChromium) {
+	if (!process.env.PUPPETEER_SKIP_DOWNLOAD && !canUseLinuxChromium) {
 		if (!workerManager) return
 
 		// NOTE - Browsers Cleaner
@@ -178,6 +184,31 @@ const CleanerService = async (force = false) => {
 	}
 
 	cleanAPIStoreCache()
+
+	// NOTE - Other cleaner
+	const cleanOther = async () => {
+		if (!workerManager) return
+
+		const clean = async (path) => {
+			if (!path) return
+
+			const freePool = await workerManager.getFreePool()
+			const pool = freePool.pool
+
+			return pool.exec('deleteResource', [path])
+		}
+
+		try {
+			await Promise.all([
+				clean(`${userDataPath}/wsEndpoint.txt`),
+				clean(`${workerManagerPath}/counter.txt`),
+			])
+		} catch (err) {
+			Console.error(err)
+		}
+	}
+
+	cleanOther()
 
 	isFirstInitCompleted = true
 }
