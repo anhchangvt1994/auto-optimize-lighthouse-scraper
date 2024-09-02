@@ -17,7 +17,7 @@ import { hashCode } from '../utils/StringHelper'
 import { CACHEABLE_STATUS_CODE } from './constants'
 import { convertUrlHeaderToQueryString, getUrl } from './utils/ForamatUrl'
 import ISRGenerator from './utils/ISRGenerator.next'
-import SSRHandler from './utils/ISRHandler'
+import SSRHandler from './utils/ISRHandler.worker'
 
 const _resetCookie = (res) => {
 	setCookie(res, `BotInfo=;Max-Age=0;Path=/`)
@@ -69,7 +69,7 @@ const puppeteerSSRService = (async () => {
 								'MTr cleaner service can not run in none serverless environment'
 							)
 
-					await CleanerService()
+					await CleanerService(true)
 
 					Console.log('Finish clean service!')
 

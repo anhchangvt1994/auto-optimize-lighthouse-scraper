@@ -46,8 +46,8 @@ var _constants3 = require('./constants')
 var _ForamatUrl = require('./utils/ForamatUrl')
 var _ISRGeneratornext = require('./utils/ISRGenerator.next')
 var _ISRGeneratornext2 = _interopRequireDefault(_ISRGeneratornext)
-var _ISRHandler = require('./utils/ISRHandler')
-var _ISRHandler2 = _interopRequireDefault(_ISRHandler)
+var _ISRHandlerworker = require('./utils/ISRHandler.worker')
+var _ISRHandlerworker2 = _interopRequireDefault(_ISRHandlerworker)
 
 const _resetCookie = (res) => {
 	_CookieHandler.setCookie.call(void 0, res, `BotInfo=;Max-Age=0;Path=/`)
@@ -79,7 +79,7 @@ const puppeteerSSRService = (async () => {
 					const isFirstRequest = !!req.query.isFirstRequest
 					const url = req.query.url ? decodeURIComponent(req.query.url) : ''
 
-					const result = await _ISRHandler2.default.call(void 0, {
+					const result = await _ISRHandlerworker2.default.call(void 0, {
 						startGenerating,
 						hasCache: isFirstRequest,
 						url,
@@ -101,7 +101,7 @@ const puppeteerSSRService = (async () => {
 								'MTr cleaner service can not run in none serverless environment'
 							)
 
-					await _CleanerService2.default.call(void 0)
+					await _CleanerService2.default.call(void 0, true)
 
 					_ConsoleHandler2.default.log('Finish clean service!')
 

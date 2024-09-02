@@ -38,7 +38,7 @@ var _utils2 = _interopRequireDefault(_utils)
 var _ISRHandlerworker = require('./ISRHandler.worker')
 var _ISRHandlerworker2 = _interopRequireDefault(_ISRHandlerworker)
 
-const limitRequestToCrawl = 4
+const limitRequestToCrawl = 2
 let totalRequestsToCrawl = 0
 const waitingToCrawlList = new Map()
 const limitRequestWaitingToCrawl = 1
@@ -116,10 +116,10 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 
 	const certainLimitRequestToCrawl = getCertainLimitRequestToCrawl()
 
+	// console.log(result)
 	// console.log('certainLimitRequestToCrawl: ', certainLimitRequestToCrawl)
 	// console.log('totalRequestsToCrawl: ', totalRequestsToCrawl)
 	// console.log('totalRequestsWaitingToCrawl: ', totalRequestsWaitingToCrawl)
-	// console.log('-------')
 
 	if (result) {
 		const NonNullableResult = result
@@ -157,9 +157,9 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 			Date.now() - new Date(NonNullableResult.updatedAt).getTime() >
 			renewTime
 		) {
-			cacheManager.renew().then((result) => {
+			cacheManager.renew().then((hasRenew) => {
 				if (
-					!result.hasRenew &&
+					!hasRenew &&
 					(totalRequestsToCrawl < certainLimitRequestToCrawl ||
 						ISRHandlerParams.forceToCrawl)
 				) {
@@ -193,7 +193,7 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 							} else {
 								totalRequestsToCrawl =
 									totalRequestsToCrawl > certainLimitRequestToCrawl
-										? certainLimitRequestToCrawl - 2
+										? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 										: totalRequestsToCrawl - 1
 							}
 
@@ -225,7 +225,7 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 								} else {
 									totalRequestsToCrawl =
 										totalRequestsToCrawl > certainLimitRequestToCrawl
-											? certainLimitRequestToCrawl - 2
+											? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 											: totalRequestsToCrawl - 1
 								}
 
@@ -248,6 +248,8 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 					waitingToCrawlList.set(ISRHandlerParams.url, ISRHandlerParams)
 				}
 			})
+
+			result = await cacheManager.achieve()
 		}
 	} else if (
 		totalRequestsToCrawl < certainLimitRequestToCrawl ||
@@ -297,7 +299,7 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 								} else {
 									totalRequestsToCrawl =
 										totalRequestsToCrawl > certainLimitRequestToCrawl
-											? certainLimitRequestToCrawl - 2
+											? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 											: totalRequestsToCrawl - 1
 								}
 
@@ -329,7 +331,7 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 									} else {
 										totalRequestsToCrawl =
 											totalRequestsToCrawl > certainLimitRequestToCrawl
-												? certainLimitRequestToCrawl - 2
+												? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 												: totalRequestsToCrawl - 1
 									}
 
@@ -408,7 +410,7 @@ const SSRGenerator = async ({ isSkipWaiting = false, ...ISRHandlerParams }) => {
 					if (!ISRHandlerParams.forceToCrawl) {
 						totalRequestsToCrawl =
 							totalRequestsToCrawl > certainLimitRequestToCrawl
-								? certainLimitRequestToCrawl - 2
+								? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 								: totalRequestsToCrawl - 1
 					}
 				}

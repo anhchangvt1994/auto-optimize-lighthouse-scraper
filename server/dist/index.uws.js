@@ -97,14 +97,6 @@ const startServer = async () => {
 
 		setupCors(res)
 
-		// NOTE - Check and create base url
-		if (!_InitEnv.PROCESS_ENV.BASE_URL)
-			_InitEnv.PROCESS_ENV.BASE_URL = `${
-				req.getHeader('x-forwarded-proto')
-					? req.getHeader('x-forwarded-proto')
-					: 'http'
-			}://${req.getHeader('host')}`
-
 		res.end('', true) // end the request
 	})
 	;(await require('./api/index.uws').default).init(app)

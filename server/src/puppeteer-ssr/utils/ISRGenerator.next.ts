@@ -17,7 +17,7 @@ interface IISRGeneratorParams {
 	isSkipWaiting?: boolean
 }
 
-const limitRequestToCrawl = 4
+const limitRequestToCrawl = 2
 let totalRequestsToCrawl = 0
 const waitingToCrawlList = new Map<string, IISRGeneratorParams>()
 const limitRequestWaitingToCrawl = 1
@@ -97,10 +97,10 @@ const SSRGenerator = async ({
 
 	const certainLimitRequestToCrawl = getCertainLimitRequestToCrawl()
 
+	// console.log(result)
 	// console.log('certainLimitRequestToCrawl: ', certainLimitRequestToCrawl)
 	// console.log('totalRequestsToCrawl: ', totalRequestsToCrawl)
 	// console.log('totalRequestsWaitingToCrawl: ', totalRequestsWaitingToCrawl)
-	// console.log('-------')
 
 	if (result) {
 		const NonNullableResult = result
@@ -114,9 +114,9 @@ const SSRGenerator = async ({
 			Date.now() - new Date(NonNullableResult.updatedAt).getTime() >
 			renewTime
 		) {
-			cacheManager.renew().then((result) => {
+			cacheManager.renew().then((hasRenew) => {
 				if (
-					!result.hasRenew &&
+					!hasRenew &&
 					(totalRequestsToCrawl < certainLimitRequestToCrawl ||
 						ISRHandlerParams.forceToCrawl)
 				) {
@@ -150,7 +150,7 @@ const SSRGenerator = async ({
 							} else {
 								totalRequestsToCrawl =
 									totalRequestsToCrawl > certainLimitRequestToCrawl
-										? certainLimitRequestToCrawl - 2
+										? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 										: totalRequestsToCrawl - 1
 							}
 
@@ -180,7 +180,7 @@ const SSRGenerator = async ({
 							} else {
 								totalRequestsToCrawl =
 									totalRequestsToCrawl > certainLimitRequestToCrawl
-										? certainLimitRequestToCrawl - 2
+										? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 										: totalRequestsToCrawl - 1
 							}
 
@@ -203,6 +203,8 @@ const SSRGenerator = async ({
 					waitingToCrawlList.set(ISRHandlerParams.url, ISRHandlerParams)
 				}
 			})
+
+			result = await cacheManager.achieve()
 		}
 	} else if (
 		totalRequestsToCrawl < certainLimitRequestToCrawl ||
@@ -249,7 +251,7 @@ const SSRGenerator = async ({
 								} else {
 									totalRequestsToCrawl =
 										totalRequestsToCrawl > certainLimitRequestToCrawl
-											? certainLimitRequestToCrawl - 2
+											? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 											: totalRequestsToCrawl - 1
 								}
 
@@ -279,7 +281,7 @@ const SSRGenerator = async ({
 								} else {
 									totalRequestsToCrawl =
 										totalRequestsToCrawl > certainLimitRequestToCrawl
-											? certainLimitRequestToCrawl - 2
+											? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 											: totalRequestsToCrawl - 1
 								}
 
@@ -355,7 +357,7 @@ const SSRGenerator = async ({
 					if (!ISRHandlerParams.forceToCrawl) {
 						totalRequestsToCrawl =
 							totalRequestsToCrawl > certainLimitRequestToCrawl
-								? certainLimitRequestToCrawl - 2
+								? totalRequestsToCrawl - certainLimitRequestToCrawl - 1
 								: totalRequestsToCrawl - 1
 					}
 				}

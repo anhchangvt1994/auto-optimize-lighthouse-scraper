@@ -1,4 +1,3 @@
-import ServerConfig from '../../server.config'
 import { ENV_MODE, PROCESS_ENV } from '../InitEnv'
 import { defaultServerConfig } from './constants'
 import { IServerConfig, IServerConfigOptional } from './types'

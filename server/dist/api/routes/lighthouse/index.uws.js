@@ -33,20 +33,40 @@ function _optionalChain(ops) {
 }
 var _ConsoleHandler = require('../../../utils/ConsoleHandler')
 var _ConsoleHandler2 = _interopRequireDefault(_ConsoleHandler)
-var _FetchManager = require('../../utils/FetchManager')
+var _utils = require('../../utils/FetchManager/utils')
 
 var _worker = require('./worker')
 var _InitEnv = require('../../../utils/InitEnv')
+var _constants = require('./constants')
+
+const limitRequest = 2
+let totalRequests = 0
 
 const apiLighthouse = (() => {
 	let _app
 
 	const _allRequestHandler = () => {
 		_app.get('/api/lighthouse', async (res, req) => {
+			if (totalRequests >= limitRequest) {
+				res.writeStatus('429 Too many requests').end('Too many requests', true)
+				return
+			}
+
+			totalRequests++
+
 			res.onAborted(() => {
 				res.writableEnded = true
+				totalRequests--
 				_ConsoleHandler2.default.log('Request aborted')
 			})
+
+			// NOTE - Check and create base url
+			if (!_InitEnv.PROCESS_ENV.BASE_URL)
+				_InitEnv.PROCESS_ENV.BASE_URL = `${
+					req.getHeader('x-forwarded-proto')
+						? req.getHeader('x-forwarded-proto')
+						: 'http'
+				}://${req.getHeader('host')}`
 
 			const urlParam = req.getQuery('url')
 
@@ -78,9 +98,9 @@ const apiLighthouse = (() => {
 				params.append('urlTesting', urlParam)
 
 				const requestUrl =
-					_InitEnv.PROCESS_ENV.BASE_URL + `?${params.toString()}`
+					_constants.TARGET_OPTIMAL_URL + `?${params.toString()}`
 
-				const result = await _FetchManager.fetchData.call(void 0, requestUrl, {
+				const result = await _utils.fetchData.call(void 0, requestUrl, {
 					method: 'GET',
 					headers: {
 						Accept: 'text/html; charset=utf-8',
@@ -91,12 +111,13 @@ const apiLighthouse = (() => {
 
 				if (result.status !== 200) {
 					if (!res.writableEnded) {
+						totalRequests--
 						res.cork(() => {
 							const statusMessage = result.message || 'Internal Server Error'
 							res
 								.writeHeader('Access-Control-Allow-Origin', '*') // Ensure header is sent in the final response
 								.writeStatus(`${result.status} ${statusMessage}`)
-								.end(statusMessage) // end the request
+								.end(statusMessage, true) // end the request
 							res.writableEnded = true // disable to write
 						})
 					}
@@ -105,7 +126,7 @@ const apiLighthouse = (() => {
 				if (!res.writableEnded) {
 					const lighthouseResult = await Promise.all([
 						new Promise((res) => {
-							_FetchManager.fetchData
+							_utils.fetchData
 								.call(
 									void 0,
 									`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlParam}&strategy=mobile&category=ACCESSIBILITY&category=BEST_PRACTICES&category=PERFORMANCE&category=SEO`
@@ -120,7 +141,7 @@ const apiLighthouse = (() => {
 								.catch(() => res(undefined))
 						}),
 						new Promise((res) => {
-							_FetchManager.fetchData
+							_utils.fetchData
 								.call(
 									void 0,
 									`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${requestUrl}&strategy=mobile&category=ACCESSIBILITY&category=BEST_PRACTICES&category=PERFORMANCE&category=SEO`
@@ -213,6 +234,8 @@ const apiLighthouse = (() => {
 
 						return tmpLighthouseResponse
 					})()
+
+					totalRequests--
 
 					if (!res.writableEnded) {
 						res.cork(() => {

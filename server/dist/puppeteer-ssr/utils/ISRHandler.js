@@ -57,11 +57,6 @@ var _OptimizeHtmlworker = require('./OptimizeHtml.worker')
 
 const browserManager = (() => {
 	if (_InitEnv.ENV_MODE === 'development') return undefined
-	if (_constants.POWER_LEVEL === _constants.POWER_LEVEL_LIST.THREE)
-		return _BrowserManager2.default.call(
-			void 0,
-			() => `${_constants.userDataPath}/user_data_${Date.now()}`
-		)
 	return _BrowserManager2.default.call(void 0)
 })()
 
@@ -403,7 +398,13 @@ const ISRHandler = async ({ hasCache, url }) => {
 	) {
 		enableOptimizeAndCompressIfRemoteCrawlerFail = true
 		_ConsoleHandler2.default.log('Create new page')
-		const page = await browserManager.newPage()
+		const page = await _optionalChain([
+			browserManager,
+			'access',
+			(_32) => _32.newPage,
+			'optionalCall',
+			(_33) => _33(),
+		])
 		const safePage = _getSafePage(page)
 
 		_ConsoleHandler2.default.log('Create new page success!')
@@ -423,30 +424,30 @@ const ISRHandler = async ({ hasCache, url }) => {
 			await _optionalChain([
 				safePage,
 				'call',
-				(_32) => _32(),
+				(_34) => _34(),
 				'optionalAccess',
-				(_33) => _33.waitForNetworkIdle,
+				(_35) => _35.waitForNetworkIdle,
 				'call',
-				(_34) => _34({ idleTime: 150 }),
+				(_36) => _36({ idleTime: 150 }),
 			])
 			await _optionalChain([
 				safePage,
 				'call',
-				(_35) => _35(),
+				(_37) => _37(),
 				'optionalAccess',
-				(_36) => _36.setRequestInterception,
+				(_38) => _38.setRequestInterception,
 				'call',
-				(_37) => _37(true),
+				(_39) => _39(true),
 			])
 			_optionalChain([
 				safePage,
 				'call',
-				(_38) => _38(),
+				(_40) => _40(),
 				'optionalAccess',
-				(_39) => _39.on,
+				(_41) => _41.on,
 				'call',
-				(_40) =>
-					_40('request', (req) => {
+				(_42) =>
+					_42('request', (req) => {
 						const resourceType = req.resourceType()
 
 						if (resourceType === 'stylesheet') {
@@ -470,12 +471,12 @@ const ISRHandler = async ({ hasCache, url }) => {
 			await _optionalChain([
 				safePage,
 				'call',
-				(_41) => _41(),
+				(_43) => _43(),
 				'optionalAccess',
-				(_42) => _42.setExtraHTTPHeaders,
+				(_44) => _44.setExtraHTTPHeaders,
 				'call',
-				(_43) =>
-					_43({
+				(_45) =>
+					_45({
 						...specialInfo,
 						service: 'puppeteer',
 					}),
@@ -499,9 +500,9 @@ const ISRHandler = async ({ hasCache, url }) => {
 						_optionalChain([
 							response,
 							'optionalAccess',
-							(_44) => _44.status,
+							(_46) => _46.status,
 							'optionalCall',
-							(_45) => _45(),
+							(_47) => _47(),
 						]),
 						() => status
 					)
@@ -518,11 +519,11 @@ const ISRHandler = async ({ hasCache, url }) => {
 			_optionalChain([
 				safePage,
 				'call',
-				(_46) => _46(),
-				'optionalAccess',
-				(_47) => _47.close,
-				'call',
 				(_48) => _48(),
+				'optionalAccess',
+				(_49) => _49.close,
+				'call',
+				(_50) => _50(),
 			])
 			return {
 				status: 500,
@@ -541,22 +542,22 @@ const ISRHandler = async ({ hasCache, url }) => {
 				await _optionalChain([
 					safePage,
 					'call',
-					(_49) => _49(),
-					'optionalAccess',
-					(_50) => _50.content,
-					'call',
 					(_51) => _51(),
+					'optionalAccess',
+					(_52) => _52.content,
+					'call',
+					(_53) => _53(),
 				]),
 				async () => ''
 			) // serialized HTML of page DOM.
 			_optionalChain([
 				safePage,
 				'call',
-				(_52) => _52(),
-				'optionalAccess',
-				(_53) => _53.close,
-				'call',
 				(_54) => _54(),
+				'optionalAccess',
+				(_55) => _55.close,
+				'call',
+				(_56) => _56(),
 			])
 		} catch (err) {
 			_ConsoleHandler2.default.log('ISRHandler line 315:')
@@ -576,24 +577,24 @@ const ISRHandler = async ({ hasCache, url }) => {
 			(_optionalChain([
 				_serverconfig2.default,
 				'access',
-				(_55) => _55.crawl,
+				(_57) => _57.crawl,
 				'access',
-				(_56) => _56.routes,
+				(_58) => _58.routes,
 				'access',
-				(_57) => _57[pathname],
+				(_59) => _59[pathname],
 				'optionalAccess',
-				(_58) => _58.optimize,
+				(_60) => _60.optimize,
 			]) ||
 				_optionalChain([
 					_serverconfig2.default,
 					'access',
-					(_59) => _59.crawl,
+					(_61) => _61.crawl,
 					'access',
-					(_60) => _60.custom,
+					(_62) => _62.custom,
 					'optionalCall',
-					(_61) => _61(pathname),
+					(_63) => _63(pathname),
 					'optionalAccess',
-					(_62) => _62.optimize,
+					(_64) => _64.optimize,
 				]) ||
 				_serverconfig2.default.crawl.optimize) &&
 			enableOptimizeAndCompressIfRemoteCrawlerFail
@@ -602,24 +603,24 @@ const ISRHandler = async ({ hasCache, url }) => {
 			(_optionalChain([
 				_serverconfig2.default,
 				'access',
-				(_63) => _63.crawl,
+				(_65) => _65.crawl,
 				'access',
-				(_64) => _64.routes,
+				(_66) => _66.routes,
 				'access',
-				(_65) => _65[pathname],
+				(_67) => _67[pathname],
 				'optionalAccess',
-				(_66) => _66.compress,
+				(_68) => _68.compress,
 			]) ||
 				_optionalChain([
 					_serverconfig2.default,
 					'access',
-					(_67) => _67.crawl,
+					(_69) => _69.crawl,
 					'access',
-					(_68) => _68.custom,
+					(_70) => _70.custom,
 					'optionalCall',
-					(_69) => _69(pathname),
+					(_71) => _71(pathname),
 					'optionalAccess',
-					(_70) => _70.compress,
+					(_72) => _72.compress,
 				]) ||
 				_serverconfig2.default.crawl.compress) &&
 			enableOptimizeAndCompressIfRemoteCrawlerFail

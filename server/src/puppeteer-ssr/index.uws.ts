@@ -21,7 +21,7 @@ import { hashCode } from '../utils/StringHelper'
 import { CACHEABLE_STATUS_CODE } from './constants'
 import { convertUrlHeaderToQueryString, getUrl } from './utils/ForamatUrl.uws'
 import ISRGenerator from './utils/ISRGenerator.next'
-import SSRHandler from './utils/ISRHandler'
+import SSRHandler from './utils/ISRHandler.worker'
 
 const COOKIE_EXPIRED_SECOND = COOKIE_EXPIRED / 1000
 
@@ -123,7 +123,7 @@ const puppeteerSSRService = (async () => {
 							Console.log('Request aborted')
 						})
 
-						await CleanerService()
+						await CleanerService(true)
 
 						Console.log('Finish clean service!')
 
@@ -138,6 +138,14 @@ const puppeteerSSRService = (async () => {
 
 			// NOTE - Check if static will send static file
 			if (res.writableEnded) return
+
+			// NOTE - Check and create base url
+			if (!PROCESS_ENV.BASE_URL)
+				PROCESS_ENV.BASE_URL = `${
+					req.getHeader('x-forwarded-proto')
+						? req.getHeader('x-forwarded-proto')
+						: 'http'
+				}://${req.getHeader('host')}`
 
 			// NOTE - Detect, setup BotInfo and LocaleInfo
 			DetectBotMiddle(res, req)
@@ -304,7 +312,8 @@ const puppeteerSSRService = (async () => {
 											res.writeHeader('Retry-After', '120')
 
 										res.end(body, true)
-									} catch {
+									} catch (err) {
+										console.log(err)
 										res
 											.writeStatus('504')
 											.writeHeader('Content-Type', 'text/html; charset=utf-8')

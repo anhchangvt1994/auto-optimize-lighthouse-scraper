@@ -39,8 +39,6 @@ const _getSafePage = (page) => {
 	}
 } // _getSafePage
 
-let _browser
-
 // const runLightHouse = async (url: string, wsEndpoint: string) => {
 // 	if (!url || !wsEndpoint) return
 
@@ -67,7 +65,7 @@ let _browser
 // 		safePage()
 // 	)
 
-// 	safePage()?.close()
+// 	await safePage()?.close()
 
 // 	return lighthouseResult
 // } // runLighthouse
@@ -75,72 +73,72 @@ let _browser
 const runPageSpeed = async (url, wsEndpoint) => {
 	if (!url || !wsEndpoint) return
 
-	if (!_browser || !_browser.connected) {
-		_browser = await _constants.puppeteer.connect({
-			browserWSEndpoint: wsEndpoint,
-		})
-	}
+	const browser = await _constants.puppeteer.connect({
+		browserWSEndpoint: wsEndpoint,
+	})
 
-	if (!_browser) return
+	if (!browser || !browser.connected) return
 
-	const page = await _browser.newPage()
+	const page = await browser.newPage()
 
 	const safePage = _getSafePage(page)
 
-	await _optionalChain([
-		safePage,
-		'call',
-		(_) => _(),
-		'optionalAccess',
-		(_2) => _2.setDefaultTimeout,
-		'call',
-		(_3) => _3(300000),
-	])
-	_optionalChain([
-		safePage,
-		'call',
-		(_4) => _4(),
-		'optionalAccess',
-		(_5) => _5.goto,
-		'call',
-		(_6) => _6(url),
-	])
-	const pageSpeedResponse = await _optionalChain([
-		safePage,
-		'call',
-		(_7) => _7(),
-		'optionalAccess',
-		(_8) => _8.waitForResponse,
-		'call',
-		(_9) =>
-			_9(
-				(res) =>
-					res.url().startsWith('https://www.googleapis.com/pagespeedonline') &&
-					res.status() === 200
-			),
-	])
+	let pageSpeedResponse
+	try {
+		_optionalChain([
+			safePage,
+			'call',
+			(_) => _(),
+			'optionalAccess',
+			(_2) => _2.goto,
+			'call',
+			(_3) =>
+				_3(url, {
+					timeout: 120000,
+				}),
+		])
+
+		pageSpeedResponse = await _optionalChain([
+			safePage,
+			'call',
+			(_4) => _4(),
+			'optionalAccess',
+			(_5) => _5.waitForResponse,
+			'call',
+			(_6) =>
+				_6(
+					(res) =>
+						res
+							.url()
+							.startsWith('https://www.googleapis.com/pagespeedonline') &&
+						res.status() === 200
+				),
+		])
+	} catch (err) {
+		_ConsoleHandler2.default.log(err.message)
+	}
 
 	const lighthouseResult = await new Promise(async (res) => {
 		const response = await _optionalChain([
 			pageSpeedResponse,
 			'optionalAccess',
-			(_10) => _10.json,
+			(_7) => _7.json,
 			'call',
-			(_11) => _11(),
+			(_8) => _8(),
 		])
 
 		if (response) res(response.lighthouseResult)
-		res(undefined)
+		else res(undefined)
 	})
 
-	_optionalChain([
+	await _optionalChain([
 		safePage,
 		'call',
-		(_12) => _12(),
+		(_9) => _9(),
 		'optionalAccess',
-		(_13) => _13.close,
+		(_10) => _10.close,
 		'call',
-		(_14) => _14(),
+		(_11) => _11(),
 	])
 
 	return lighthouseResult
@@ -149,38 +147,48 @@ const runPageSpeed = async (url, wsEndpoint) => {
 const getPageSpeedUrl = async (url, wsEndpoint) => {
 	if (!url || !wsEndpoint) return
 
-	if (!_browser || !_browser.connected) {
-		_browser = await _constants.puppeteer.connect({
-			browserWSEndpoint: wsEndpoint,
-		})
-	}
+	const browser = await _constants.puppeteer.connect({
+		browserWSEndpoint: wsEndpoint,
+	})
 
-	if (!_browser) return
+	if (!browser || !browser.connected) return
+
+	const page = await browser.newPage()
+	const safePage = _getSafePage(page)
 
 	try {
-		const page = await _browser.newPage()
+		await _optionalChain([
+			safePage,
+			'call',
+			(_12) => _12(),
+			'optionalAccess',
+			(_13) => _13.goto,
+			'call',
+			(_14) =>
+				_14(`https://pagespeed.web.dev/analysis?url=${url}`, {
+					waitUntil: 'load',
+					timeout: 0,
+				}),
+		])
 
-		const safePage = _getSafePage(page)
+		await new Promise((res) => setTimeout(res, 10000))
+
+		const pageSpeedUrl = await page.url()
 
 		await _optionalChain([
 			safePage,
 			'call',
 			(_15) => _15(),
 			'optionalAccess',
-			(_16) => _16.goto,
+			(_16) => _16.close,
 			'call',
-			(_17) =>
-				_17(`https://pagespeed.web.dev/analysis?url=${url}`, {
-					waitUntil: 'load',
-					timeout: 0,
-				}),
+			(_17) => _17(),
 		])
 
-		await new Promise((res) => setTimeout(res, 5000))
-
-		const pageSpeedUrl = await page.url()
-
-		_optionalChain([
+		return { pageSpeedUrl }
+	} catch (err) {
+		_ConsoleHandler2.default.log(err.message)
+		await _optionalChain([
 			safePage,
 			'call',
 			(_18) => _18(),
@@ -189,10 +197,6 @@ const getPageSpeedUrl = async (url, wsEndpoint) => {
 			'call',
 			(_20) => _20(),
 		])
-
-		return { pageSpeedUrl }
-	} catch (err) {
-		_ConsoleHandler2.default.log(err.message)
 		return { pageSpeedUrl: '' }
 	}
 } // getPageSpeedUrl

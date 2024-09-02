@@ -56,8 +56,8 @@ var _constants3 = require('./constants')
 var _ForamatUrluws = require('./utils/ForamatUrl.uws')
 var _ISRGeneratornext = require('./utils/ISRGenerator.next')
 var _ISRGeneratornext2 = _interopRequireDefault(_ISRGeneratornext)
-var _ISRHandler = require('./utils/ISRHandler')
-var _ISRHandler2 = _interopRequireDefault(_ISRHandler)
+var _ISRHandlerworker = require('./utils/ISRHandler.worker')
+var _ISRHandlerworker2 = _interopRequireDefault(_ISRHandlerworker)
 
 const COOKIE_EXPIRED_SECOND = _constants.COOKIE_EXPIRED / 1000
 
@@ -126,7 +126,7 @@ const puppeteerSSRService = (async () => {
 							_ConsoleHandler2.default.log('Request aborted')
 						})
 
-						const result = await _ISRHandler2.default.call(void 0, {
+						const result = await _ISRHandlerworker2.default.call(void 0, {
 							startGenerating,
 							hasCache: isFirstRequest,
 							url,
@@ -159,7 +159,7 @@ const puppeteerSSRService = (async () => {
 							_ConsoleHandler2.default.log('Request aborted')
 						})
 
-						await _CleanerService2.default.call(void 0)
+						await _CleanerService2.default.call(void 0, true)
 
 						_ConsoleHandler2.default.log('Finish clean service!')
 
@@ -174,6 +174,14 @@ const puppeteerSSRService = (async () => {
 
 			// NOTE - Check if static will send static file
 			if (res.writableEnded) return
+
+			// NOTE - Check and create base url
+			if (!_InitEnv.PROCESS_ENV.BASE_URL)
+				_InitEnv.PROCESS_ENV.BASE_URL = `${
+					req.getHeader('x-forwarded-proto')
+						? req.getHeader('x-forwarded-proto')
+						: 'http'
+				}://${req.getHeader('host')}`
 
 			// NOTE - Detect, setup BotInfo and LocaleInfo
 			_DetectBot2.default.call(void 0, res, req)
@@ -376,7 +384,8 @@ const puppeteerSSRService = (async () => {
 											res.writeHeader('Retry-After', '120')
 
 										res.end(body, true)
-									} catch (e) {
+									} catch (err) {
+										console.log(err)
 										res
 											.writeStatus('504')
 											.writeHeader('Content-Type', 'text/html; charset=utf-8')

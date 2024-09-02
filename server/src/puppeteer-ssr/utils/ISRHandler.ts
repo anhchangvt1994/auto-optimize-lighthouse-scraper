@@ -23,8 +23,6 @@ import { optimizeContent } from './OptimizeHtml.worker'
 
 const browserManager = (() => {
 	if (ENV_MODE === 'development') return undefined as unknown as IBrowser
-	if (POWER_LEVEL === POWER_LEVEL_LIST.THREE)
-		return BrowserManager(() => `${userDataPath}/user_data_${Date.now()}`)
 	return BrowserManager()
 })()
 
@@ -277,7 +275,7 @@ const ISRHandler = async ({ hasCache, url }: IISRHandlerParam) => {
 	) {
 		enableOptimizeAndCompressIfRemoteCrawlerFail = true
 		Console.log('Create new page')
-		const page = await browserManager.newPage()
+		const page = await browserManager.newPage?.()
 		const safePage = _getSafePage(page)
 
 		Console.log('Create new page success!')

@@ -43,7 +43,11 @@ var _path2 = _interopRequireDefault(_path)
 var _zlib = require('zlib')
 
 if (!_fs2.default.existsSync(_constants.pagesPath)) {
-	_fs2.default.mkdirSync(_constants.pagesPath)
+	try {
+		_fs2.default.mkdirSync(_constants.pagesPath)
+	} catch (err) {
+		_ConsoleHandler2.default.error(err)
+	}
 }
 
 const regexKeyConverter =
@@ -345,3 +349,38 @@ const remove = (url) => {
 	}
 }
 exports.remove = remove // remove
+
+const rename = (params) => {
+	if (!params || !params.url)
+		return _ConsoleHandler2.default.log('Url can not empty!')
+
+	const key = exports.getKey.call(void 0, params.url)
+	const file = `${_constants.pagesPath}/${key}${
+		params.type ? '.' + params.type : ''
+	}.br`
+
+	if (!_fs2.default.existsSync(file)) {
+		const curFile = (() => {
+			switch (true) {
+				case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.raw.br`):
+					return `${_constants.pagesPath}/${key}.raw.br`
+				case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.br`):
+					return `${_constants.pagesPath}/${key}.br`
+				case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.renew.br`):
+					return `${_constants.pagesPath}/${key}.renew.br`
+				default:
+					return
+			}
+		})()
+
+		if (!curFile) return
+
+		try {
+			_fs2.default.renameSync(curFile, file)
+		} catch (err) {
+			_ConsoleHandler2.default.error(err)
+			return
+		}
+	}
+}
+exports.rename = rename // renew

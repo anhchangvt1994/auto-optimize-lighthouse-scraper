@@ -15,17 +15,30 @@ import Console from './ConsoleHandler'
 import { PROCESS_ENV } from './InitEnv'
 import WorkerManager from './WorkerManager'
 
-const workerManager = WorkerManager.init(
-	path.resolve(__dirname, `./FollowResource.worker/index.${resourceExtension}`),
-	{
-		minWorkers: 1,
-		maxWorkers: 4,
-	},
-	['scanToCleanBrowsers', 'scanToCleanPages', 'scanToCleanAPIDataCache']
-)
+const { isMainThread } = require('worker_threads')
 
-const CleanerService = async () => {
+let isFirstInitCompleted = false
+
+const workerManager = (() => {
+	if (!isMainThread) return
+	return WorkerManager.init(
+		path.resolve(
+			__dirname,
+			`./FollowResource.worker/index.${resourceExtension}`
+		),
+		{
+			minWorkers: 1,
+			maxWorkers: 4,
+		},
+		['scanToCleanBrowsers', 'scanToCleanPages', 'scanToCleanAPIDataCache']
+	)
+})()
+
+const CleanerService = async (force = false) => {
+	if (isFirstInitCompleted && !force) return
 	if (!process.env.PUPPETEER_SKIP_DOWNLOAD || !canUseLinuxChromium) {
+		if (!workerManager) return
+
 		// NOTE - Browsers Cleaner
 		const cleanBrowsers = (() => {
 			let executablePath: string
@@ -68,7 +81,9 @@ const CleanerService = async () => {
 					Console.error(err)
 				}
 
-				// freePool.terminate()
+				freePool.terminate({
+					force: true,
+				})
 
 				if (!SERVER_LESS)
 					setTimeout(() => {
@@ -77,15 +92,16 @@ const CleanerService = async () => {
 			}
 		})()
 
-		// if (!SERVER_LESS) cleanBrowsers()
 		if (process.env.MODE === 'development') cleanBrowsers(0)
-		else cleanBrowsers(60)
+		else cleanBrowsers(360)
 	}
 
 	// NOTE - Pages Cleaner
 	const cleanPages = async (
 		durationValidToKeep = PROCESS_ENV.RESET_RESOURCE ? 0 : 1
 	) => {
+		if (!workerManager) return
+
 		const freePool = await workerManager.getFreePool()
 		const pool = freePool.pool
 
@@ -95,7 +111,9 @@ const CleanerService = async () => {
 			Console.error(err)
 		}
 
-		// freePool.terminate()
+		freePool.terminate({
+			force: true,
+		})
 
 		if (!SERVER_LESS) {
 			const cacheTimeHour = ServerConfig.crawl.cache.time / 3600
@@ -111,6 +129,8 @@ const CleanerService = async () => {
 
 	// NOTE - API Data Cache Cleaner
 	const cleanAPIDataCache = async () => {
+		if (!workerManager) return
+
 		const freePool = await workerManager.getFreePool()
 		const pool = freePool.pool
 
@@ -120,20 +140,23 @@ const CleanerService = async () => {
 			Console.error(err)
 		}
 
-		// freePool.terminate()
+		freePool.terminate({
+			force: true,
+		})
 
 		if (!SERVER_LESS) {
 			setTimeout(() => {
 				cleanAPIDataCache()
-			}, 10000)
+			}, 30000)
 		}
 	}
 
-	if (process.env.MODE === 'development') cleanAPIDataCache()
-	else cleanAPIDataCache()
+	cleanAPIDataCache()
 
 	// NOTE - API Store Cache Cleaner
 	const cleanAPIStoreCache = async () => {
+		if (!workerManager) return
+
 		const freePool = await workerManager.getFreePool()
 		const pool = freePool.pool
 
@@ -143,17 +166,20 @@ const CleanerService = async () => {
 			Console.error(err)
 		}
 
-		// freePool.terminate()
+		freePool.terminate({
+			force: true,
+		})
 
 		if (!SERVER_LESS) {
 			setTimeout(() => {
 				cleanAPIStoreCache()
-			}, 10000)
+			}, 30000)
 		}
 	}
 
-	if (process.env.MODE === 'development') cleanAPIStoreCache()
-	else cleanAPIStoreCache()
+	cleanAPIStoreCache()
+
+	isFirstInitCompleted = true
 }
 
 if (!SERVER_LESS) CleanerService()

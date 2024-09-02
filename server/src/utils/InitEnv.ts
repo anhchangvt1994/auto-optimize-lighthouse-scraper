@@ -73,7 +73,7 @@ export const PROCESS_ENV = (() => {
 
 	const tmpProcessEnv = process.env as IProcessENV
 
-	tmpProcessEnv.BUILD_TOOL = 'vite'
+	tmpProcessEnv.BUILD_TOOL = 'webpack'
 	tmpProcessEnv.RESET_RESOURCE = true
 
 	if (process.env.IS_REMOTE_CRAWLER !== undefined) {
