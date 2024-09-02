@@ -112,6 +112,14 @@ const startServer = async () => {
 			workerData: { order: 5, port: 4044 },
 		})
 		_createWorkerListener(worker5)
+		const worker6 = new Worker(__filename, {
+			workerData: { order: 6, port: 4045 },
+		})
+		_createWorkerListener(worker6)
+		const worker7 = new Worker(__filename, {
+			workerData: { order: 6, port: 4046 },
+		})
+		_createWorkerListener(worker7)
 	} else {
 		const setupCors = (res) => {
 			res
