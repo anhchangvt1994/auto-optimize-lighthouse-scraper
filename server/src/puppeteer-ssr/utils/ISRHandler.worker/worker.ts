@@ -113,7 +113,7 @@ const waitResponse = (() => {
 						?.goto(url.split('?')[0], {
 							// waitUntil: 'networkidle2',
 							waitUntil: 'load',
-							timeout: 30000,
+							timeout: 20000,
 						})
 						.then((res) => {
 							setTimeout(() => resolveAfterPageLoad(res), firstWaitingDuration)
