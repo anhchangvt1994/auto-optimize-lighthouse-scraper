@@ -64,7 +64,10 @@ const apiLighthouse = (() => {
 				const params = new URLSearchParams()
 				params.append('urlTesting', urlParam as string)
 
-				const requestUrl = TARGET_OPTIMAL_URL + `?${params.toString()}`
+				const requestUrl =
+					((PROCESS_ENV.BASE_URL as string).includes('localhost')
+						? TARGET_OPTIMAL_URL
+						: PROCESS_ENV.BASE_URL) + `?${params.toString()}`
 
 				const result = await fetchData(requestUrl, {
 					method: 'GET',
