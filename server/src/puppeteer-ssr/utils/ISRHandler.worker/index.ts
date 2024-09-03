@@ -23,7 +23,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 	if (!browserManager || !params.url) return
 
 	const freePool = await workerManager.getFreePool({
-		delay: 250,
+		delay: 150,
 	})
 
 	const browser = await browserManager.get()
@@ -64,7 +64,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 				} else {
 					res(undefined)
 				}
-			}, 15000)
+			}, 12000)
 			try {
 				const tmpResult = await pool.exec(
 					'ISRHandler',

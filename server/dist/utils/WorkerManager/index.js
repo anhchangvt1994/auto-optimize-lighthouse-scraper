@@ -88,7 +88,7 @@ const WorkerManager = (() => {
 							)
 							res(tmpCounter)
 						},
-						workerOrder > 1 ? workerOrder * 1000 : 0
+						workerOrder > 1 ? workerOrder * 150 : 0
 					)
 				})
 
@@ -117,7 +117,7 @@ const WorkerManager = (() => {
 							)
 							res(tmpCounter)
 						},
-						workerOrder > 1 ? workerOrder * 1000 : 0
+						workerOrder > 1 ? workerOrder * 150 : 0
 					)
 				})
 
