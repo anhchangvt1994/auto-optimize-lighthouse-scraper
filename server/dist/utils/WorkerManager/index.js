@@ -152,7 +152,6 @@ const WorkerManager = (() => {
 								}
 
 								if (!pool.stats().activeTasks) {
-									console.log(pool.stats())
 									pool.terminate(options.force)
 								}
 							} catch (err) {
