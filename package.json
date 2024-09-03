@@ -1,7 +1,7 @@
 {
 	"private": true,
 	"scripts": {
-		"start": "npm run server-build && npx cross-env ENV=production node server/dist/index.uws.worker.js",
+		"start": "npm run server-build && npx cross-env ENV=production node server/dist/index.uws.js",
 		"start:pm2": "npm run server-build && npx cross-env ENV=production npm run pm2-puppeteer-ssr:uws",
 		"dev": "cross-env ENV=development npm run start-dev",
 		"dev:fastify": "cross-env ENV=development npm run start-dev:fastify",
