@@ -21,7 +21,7 @@ export const runPageSpeed = async (url: string) => {
 	if (!browserManager || !url) return
 
 	const freePool = await workerManager.getFreePool({
-		delay: 250,
+		delay: 1000,
 	})
 
 	const browser = await browserManager.get()
