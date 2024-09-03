@@ -82,15 +82,15 @@ const fetchData = async (
 
 const waitResponse = (() => {
 	const firstWaitingDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const defaultRequestWaitingDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestServedFromCacheDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestFailDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const maximumTimeout =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 10000 : 10000
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 15000 : 15000
 
 	return async (page: Page, url: string, duration: number) => {
 		// console.log(url.split('?')[0])
@@ -113,7 +113,7 @@ const waitResponse = (() => {
 						?.goto(url.split('?')[0], {
 							// waitUntil: 'networkidle2',
 							waitUntil: 'load',
-							timeout: 15000,
+							timeout: 20000,
 						})
 						.then((res) => {
 							setTimeout(() => resolveAfterPageLoad(res), firstWaitingDuration)
@@ -196,7 +196,7 @@ const waitResponse = (() => {
 
 				setTimeout(() => {
 					resolve(result)
-				}, 100)
+				}, 500)
 			})
 		} catch (err) {
 			// console.log(err.message)

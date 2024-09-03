@@ -105,17 +105,17 @@ const fetchData = async (input, init, reqData) => {
 
 const waitResponse = (() => {
 	const firstWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const defaultRequestWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestServedFromCacheDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestFailDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 350 : 350
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const maximumTimeout =
 		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
-			? 10000
-			: 10000
+			? 15000
+			: 15000
 
 	return async (page, url, duration) => {
 		// console.log(url.split('?')[0])
@@ -154,7 +154,7 @@ const waitResponse = (() => {
 							_6(url.split('?')[0], {
 								// waitUntil: 'networkidle2',
 								waitUntil: 'load',
-								timeout: 15000,
+								timeout: 20000,
 							}),
 						'access',
 						(_7) => _7.then,
@@ -303,7 +303,7 @@ const waitResponse = (() => {
 
 				setTimeout(() => {
 					resolve(result)
-				}, 100)
+				}, 500)
 			})
 		} catch (err) {
 			// console.log(err.message)
