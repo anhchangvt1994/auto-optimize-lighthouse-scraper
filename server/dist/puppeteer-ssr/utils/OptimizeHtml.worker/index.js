@@ -10,6 +10,7 @@ var _ConsoleHandler = require('../../../utils/ConsoleHandler')
 var _ConsoleHandler2 = _interopRequireDefault(_ConsoleHandler)
 var _WorkerManager = require('../../../utils/WorkerManager')
 var _WorkerManager2 = _interopRequireDefault(_WorkerManager)
+var _InitEnv = require('../../../utils/InitEnv')
 
 const workerManager = _WorkerManager2.default.init(
 	_path2.default.resolve(__dirname, `./worker.${_constants.resourceExtension}`),
@@ -21,7 +22,7 @@ const workerManager = _WorkerManager2.default.init(
 )
 
 const compressContent = async (html) => {
-	if (!html) return
+	if (!html || _InitEnv.PROCESS_ENV.DISABLE_COMPRESS) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,
@@ -53,7 +54,7 @@ const compressContent = async (html) => {
 exports.compressContent = compressContent // compressContent
 
 const optimizeContent = async (html, isFullOptimize = false) => {
-	if (!html) return
+	if (!html || _InitEnv.PROCESS_ENV.DISABLE_OPTIMIZE) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,
@@ -88,7 +89,7 @@ const optimizeContent = async (html, isFullOptimize = false) => {
 exports.optimizeContent = optimizeContent // compressContent
 
 const deepOptimizeContent = async (html, isFullOptimize = false) => {
-	if (!html) return
+	if (!html || _InitEnv.PROCESS_ENV.DISABLE_DEEP_OPTIMIZE) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,

@@ -430,8 +430,6 @@ const ISRHandler = async (params) => {
 				return
 			}
 
-			let isGetHtmlProcessError = false
-
 			try {
 				await _optionalChain([
 					safePage,
@@ -517,7 +515,6 @@ const ISRHandler = async (params) => {
 					_ConsoleHandler2.default.log('ISRHandler line 341:')
 					_ConsoleHandler2.default.error('err name: ', err.name)
 					_ConsoleHandler2.default.error('err message: ', err.message)
-					isGetHtmlProcessError = true
 					throw new Error('Internal Error')
 				} finally {
 					status = _nullishCoalesce(

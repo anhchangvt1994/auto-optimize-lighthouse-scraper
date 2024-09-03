@@ -2,6 +2,7 @@ import path from 'path'
 import { resourceExtension } from '../../../constants'
 import Console from '../../../utils/ConsoleHandler'
 import WorkerManager from '../../../utils/WorkerManager'
+import { PROCESS_ENV } from '../../../utils/InitEnv'
 
 const workerManager = WorkerManager.init(
 	path.resolve(__dirname, `./worker.${resourceExtension}`),
@@ -13,7 +14,7 @@ const workerManager = WorkerManager.init(
 )
 
 export const compressContent = async (html: string) => {
-	if (!html) return
+	if (!html || PROCESS_ENV.DISABLE_COMPRESS) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,
@@ -47,7 +48,7 @@ export const optimizeContent = async (
 	html: string,
 	isFullOptimize: boolean = false
 ) => {
-	if (!html) return
+	if (!html || PROCESS_ENV.DISABLE_OPTIMIZE) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,
@@ -84,7 +85,7 @@ export const deepOptimizeContent = async (
 	html: string,
 	isFullOptimize: boolean = false
 ) => {
-	if (!html) return
+	if (!html || PROCESS_ENV.DISABLE_DEEP_OPTIMIZE) return html
 
 	const freePool = await workerManager.getFreePool({
 		delay: 500,

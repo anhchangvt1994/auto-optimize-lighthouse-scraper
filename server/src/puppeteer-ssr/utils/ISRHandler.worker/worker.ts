@@ -305,8 +305,6 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 				return
 			}
 
-			let isGetHtmlProcessError = false
-
 			try {
 				await safePage()?.waitForNetworkIdle({ idleTime: 150 })
 				await safePage()?.setViewport({
@@ -347,7 +345,6 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 					Console.log('ISRHandler line 341:')
 					Console.error('err name: ', err.name)
 					Console.error('err message: ', err.message)
-					isGetHtmlProcessError = true
 					throw new Error('Internal Error')
 				} finally {
 					status = response?.status?.() ?? status
