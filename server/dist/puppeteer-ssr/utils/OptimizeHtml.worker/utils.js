@@ -271,8 +271,6 @@ const shallowOptimizeContent = async (html) => {
 		.replace(_constants3.regexRemoveSpecialTag, '')
 		.replace(_constants3.regexRemoveIconTagFirst, '')
 		.replace(_constants3.regexRemoveClassAndStyleAttrs, '')
-		.replace(_constants3.regexHalfOptimizeBody, '')
-		.replace(_constants3.regexRemoveIconTagSecond, '')
 		.replace(_constants3.regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
 			let newAttrs = curAttrs
 
@@ -339,128 +337,131 @@ const deepOptimizeContent = async (html) => {
 
 	let tmpHTML = html
 	try {
-		tmpHTML = tmpHTML.replace(
-			_constants3.regexHandleAttrsInteractiveTag,
-			(math, tag, curAttrs, negative, content, endTag) => {
-				let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
-				let newTag = tag
-				let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
-				let tmpContent = content
-				let result
+		tmpHTML = tmpHTML
+			.replace(_constants3.regexHalfOptimizeBody, '')
+			.replace(_constants3.regexRemoveIconTagSecond, '')
+			.replace(
+				_constants3.regexHandleAttrsInteractiveTag,
+				(math, tag, curAttrs, negative, content, endTag) => {
+					let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
+					let newTag = tag
+					let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
+					let tmpContent = content
+					let result
 
-				switch (true) {
-					case newTag === 'a' && !curAttrs.includes('href='):
-						newTag = 'button'
-						newAttrs = `type="button" ${newAttrs}`
-						tmpEndTag = 'button'
-						break
-					case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
-						newTag = 'button'
-						newAttrs = `type="button" ${newAttrs.replace(
-							/href(\s|$)|href=""/g,
-							''
-						)}`
-						tmpEndTag = 'button'
-						break
-					default:
-						break
-				}
-
-				switch (true) {
-					case newTag === 'a':
-						const href = _optionalChain([
-							/href=("|'|)(?<href>.*?)("|'|)+(\s|$)/g,
-							'access',
-							(_25) => _25.exec,
-							'call',
-							(_26) => _26(curAttrs),
-							'optionalAccess',
-							(_27) => _27.groups,
-							'optionalAccess',
-							(_28) => _28.href,
-						])
-						tmpContent = tmpContent.replace(
-							/[Cc]lick here|[Cc]lick this|[Gg]o|[Hh]ere|[Tt]his|[Ss]tart|[Rr]ight here|[Mm]ore|[Ll]earn more/g,
-							''
-						)
-
-						const tmpContentWithTrim = tmpContent
-							.replace(/([\n]|<!--(\s[^>]+)*-->)/g, '')
-							.trim()
-
-						if (!tmpContentWithTrim.replace(/<[^>]*>/g, ''))
-							tmpContent = `${tmpContentWithTrim} ${href}`
-
-						if (curAttrs.includes('aria-label=')) {
-							const ariaLabel = _optionalChain([
-								/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
-								'access',
-								(_29) => _29.exec,
-								'call',
-								(_30) => _30(curAttrs),
-								'optionalAccess',
-								(_31) => _31.groups,
-								'optionalAccess',
-								(_32) => _32.ariaLabel,
-							])
-
-							if (ariaLabel !== tmpContent)
-								newAttrs = curAttrs.replace(
-									/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
-									''
-								)
-						}
-
-						break
-					case newTag === 'button':
-						const tmpContentWithoutHTMLTags = tmpContent
-							.replace(/<[^>]*>|[\n]/g, '')
-							.trim()
-
-						if (!tmpContentWithoutHTMLTags) return ''
-						if (!curAttrs.includes('type='))
+					switch (true) {
+						case newTag === 'a' && !curAttrs.includes('href='):
+							newTag = 'button'
 							newAttrs = `type="button" ${newAttrs}`
+							tmpEndTag = 'button'
+							break
+						case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
+							newTag = 'button'
+							newAttrs = `type="button" ${newAttrs.replace(
+								/href(\s|$)|href=""/g,
+								''
+							)}`
+							tmpEndTag = 'button'
+							break
+						default:
+							break
+					}
 
-						if (curAttrs.includes('aria-label=')) {
-							const ariaLabel = _optionalChain([
-								/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
+					switch (true) {
+						case newTag === 'a':
+							const href = _optionalChain([
+								/href=("|'|)(?<href>.*?)("|'|)+(\s|$)/g,
 								'access',
-								(_33) => _33.exec,
+								(_25) => _25.exec,
 								'call',
-								(_34) => _34(curAttrs),
+								(_26) => _26(curAttrs),
 								'optionalAccess',
-								(_35) => _35.groups,
+								(_27) => _27.groups,
 								'optionalAccess',
-								(_36) => _36.ariaLabel,
+								(_28) => _28.href,
 							])
+							tmpContent = tmpContent.replace(
+								/[Cc]lick here|[Cc]lick this|[Gg]o|[Hh]ere|[Tt]his|[Ss]tart|[Rr]ight here|[Mm]ore|[Ll]earn more/g,
+								''
+							)
 
-							tmpContent = ariaLabel
-						} else {
-							newAttrs = `aria-label="${tmpContentWithoutHTMLTags}" ${newAttrs}`
-							tmpContent = tmpContentWithoutHTMLTags
-						}
-						break
-					case newTag === 'input' &&
-						/type=['"](button|submit)['"]/g.test(curAttrs) &&
-						!/value(\s|$)|value=['"]{2}/g.test(curAttrs):
-						return ''
-					case newTag === 'input' &&
-						/id=("|'|)(.*?)("|'|)+(\s|$)/g.test(newAttrs):
-						const id = /id=("|'|)(?<id>.*?)("|'|)+(\s|$)/g.test(newAttrs)
-						result = `<label for=${id}><${newTag} ${newAttrs}>${tmpContent}</${tmpEndTag}>`
-						break
-					default:
-						break
+							const tmpContentWithTrim = tmpContent
+								.replace(/([\n]|<!--(\s[^>]+)*-->)/g, '')
+								.trim()
+
+							if (!tmpContentWithTrim.replace(/<[^>]*>/g, ''))
+								tmpContent = `${tmpContentWithTrim} ${href}`
+
+							if (curAttrs.includes('aria-label=')) {
+								const ariaLabel = _optionalChain([
+									/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
+									'access',
+									(_29) => _29.exec,
+									'call',
+									(_30) => _30(curAttrs),
+									'optionalAccess',
+									(_31) => _31.groups,
+									'optionalAccess',
+									(_32) => _32.ariaLabel,
+								])
+
+								if (ariaLabel !== tmpContent)
+									newAttrs = curAttrs.replace(
+										/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
+										''
+									)
+							}
+
+							break
+						case newTag === 'button':
+							const tmpContentWithoutHTMLTags = tmpContent
+								.replace(/<[^>]*>|[\n]/g, '')
+								.trim()
+
+							if (!tmpContentWithoutHTMLTags) return ''
+							if (!curAttrs.includes('type='))
+								newAttrs = `type="button" ${newAttrs}`
+
+							if (curAttrs.includes('aria-label=')) {
+								const ariaLabel = _optionalChain([
+									/aria-label=("|'|)(?<ariaLabel>[^"']+)("|'|)+(\s|$)/g,
+									'access',
+									(_33) => _33.exec,
+									'call',
+									(_34) => _34(curAttrs),
+									'optionalAccess',
+									(_35) => _35.groups,
+									'optionalAccess',
+									(_36) => _36.ariaLabel,
+								])
+
+								tmpContent = ariaLabel
+							} else {
+								newAttrs = `aria-label="${tmpContentWithoutHTMLTags}" ${newAttrs}`
+								tmpContent = tmpContentWithoutHTMLTags
+							}
+							break
+						case newTag === 'input' &&
+							/type=['"](button|submit)['"]/g.test(curAttrs) &&
+							!/value(\s|$)|value=['"]{2}/g.test(curAttrs):
+							return ''
+						case newTag === 'input' &&
+							/id=("|'|)(.*?)("|'|)+(\s|$)/g.test(newAttrs):
+							const id = /id=("|'|)(?<id>.*?)("|'|)+(\s|$)/g.test(newAttrs)
+							result = `<label for=${id}><${newTag} ${newAttrs}>${tmpContent}</${tmpEndTag}>`
+							break
+						default:
+							break
+					}
+
+					result =
+						result || tmpEndTag
+							? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
+							: `<${newTag} ${negative} ${newAttrs}>`
+
+					return result
 				}
-
-				result =
-					result || tmpEndTag
-						? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
-						: `<${newTag} ${negative} ${newAttrs}>`
-
-				return result
-			}
-		)
+			)
 	} catch (err) {
 		return html
 	}

@@ -52,7 +52,7 @@ const workerManager = (() => {
 		),
 		{
 			minWorkers: 1,
-			maxWorkers: 2,
+			maxWorkers: 1,
 			enableGlobalCounter: !isMainThread,
 		},
 		['deleteResource']
@@ -245,7 +245,7 @@ function BrowserManager() {
 
 			if (browserLaunch) {
 				try {
-					let tabsClosed = 0
+					// let tabsClosed = 0
 					const browser = await browserLaunch
 
 					browserStore.wsEndpoint = browser.wsEndpoint()
@@ -257,30 +257,8 @@ function BrowserManager() {
 						browserStore.wsEndpoint
 					)
 
-					browser.on('createNewPage', async (page) => {
-						if (page) {
-							const safePage = _getSafePage(page)
-
-							const timeoutToCloseBrowserPage = setTimeout(() => {
-								browser.emit('closePage', true)
-							}, 30000)
-
-							_optionalChain([
-								safePage,
-								'call',
-								(_) => _(),
-								'optionalAccess',
-								(_2) => _2.once,
-								'call',
-								(_3) =>
-									_3('close', async () => {
-										clearTimeout(timeoutToCloseBrowserPage)
-									}),
-							])
-						}
-					})
-
-					let closePageTimeout
+					// let closePageTimeout: NodeJS.Timeout
+					let closeBrowserTimeout
 
 					browser.on('closePage', async (url) => {
 						// tabsClosed++
@@ -295,23 +273,16 @@ function BrowserManager() {
 						) {
 							if (browser.connected)
 								try {
-									if (closePageTimeout) clearTimeout(closePageTimeout)
+									// if (closePageTimeout) clearTimeout(closePageTimeout)
 
-									// const pages = await browser.pages()
-
-									// if (pages.length) {
-									// 	for (const page of pages) {
-									// 		if (browser.connected && !page.isClosed()) {
-									// 			await new Promise((res) => setTimeout(res, 3000))
-									// 			if (!page.isClosed()) await page.close()
-									// 		}
-									// 	}
-									// }
-
-									browser.close().then(() => {
-										browser.emit('closed', true)
-										_ConsoleHandler2.default.log('Browser closed')
-									})
+									if (closeBrowserTimeout) clearTimeout(closeBrowserTimeout)
+									closeBrowserTimeout = setTimeout(() => {
+										if (!browser.connected) return
+										browser.close().then(() => {
+											browser.emit('closed', true)
+											_ConsoleHandler2.default.log('Browser closed')
+										})
+									}, 20000)
 								} catch (err) {
 									_ConsoleHandler2.default.log('BrowserManager line 193')
 									_ConsoleHandler2.default.error(err)
@@ -369,9 +340,9 @@ function BrowserManager() {
 				const page = await _optionalChain([
 					browser,
 					'optionalAccess',
-					(_4) => _4.newPage,
+					(_) => _.newPage,
 					'optionalCall',
-					(_5) => _5(),
+					(_2) => _2(),
 				])
 
 				if (!page) {

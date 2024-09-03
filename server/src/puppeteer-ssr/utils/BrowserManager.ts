@@ -37,7 +37,7 @@ const workerManager = (() => {
 		),
 		{
 			minWorkers: 1,
-			maxWorkers: 2,
+			maxWorkers: 1,
 			enableGlobalCounter: !isMainThread,
 		},
 		['deleteResource']
@@ -221,7 +221,7 @@ function BrowserManager(): IBrowser | undefined {
 
 			if (browserLaunch) {
 				try {
-					let tabsClosed = 0
+					// let tabsClosed = 0
 					const browser: Browser = (await browserLaunch) as Browser
 
 					browserStore.wsEndpoint = browser.wsEndpoint()
@@ -229,21 +229,8 @@ function BrowserManager(): IBrowser | undefined {
 
 					setTextData(`${userDataPath}/wsEndpoint.txt`, browserStore.wsEndpoint)
 
-					browser.on('createNewPage', (async (page?: Page) => {
-						if (page) {
-							const safePage = _getSafePage(page)
-
-							const timeoutToCloseBrowserPage = setTimeout(() => {
-								browser.emit('closePage', true)
-							}, 30000)
-
-							safePage()?.once('close', async () => {
-								clearTimeout(timeoutToCloseBrowserPage)
-							})
-						}
-					}) as any)
-
-					let closePageTimeout: NodeJS.Timeout
+					// let closePageTimeout: NodeJS.Timeout
+					let closeBrowserTimeout: NodeJS.Timeout
 
 					browser.on('closePage', async (url) => {
 						// tabsClosed++
@@ -252,23 +239,16 @@ function BrowserManager(): IBrowser | undefined {
 						if (!SERVER_LESS && currentWsEndpoint !== browser.wsEndpoint()) {
 							if (browser.connected)
 								try {
-									if (closePageTimeout) clearTimeout(closePageTimeout)
+									// if (closePageTimeout) clearTimeout(closePageTimeout)
 
-									// const pages = await browser.pages()
-
-									// if (pages.length) {
-									// 	for (const page of pages) {
-									// 		if (browser.connected && !page.isClosed()) {
-									// 			await new Promise((res) => setTimeout(res, 3000))
-									// 			if (!page.isClosed()) await page.close()
-									// 		}
-									// 	}
-									// }
-
-									browser.close().then(() => {
-										browser.emit('closed', true)
-										Console.log('Browser closed')
-									})
+									if (closeBrowserTimeout) clearTimeout(closeBrowserTimeout)
+									closeBrowserTimeout = setTimeout(() => {
+										if (!browser.connected) return
+										browser.close().then(() => {
+											browser.emit('closed', true)
+											Console.log('Browser closed')
+										})
+									}, 20000)
 								} catch (err) {
 									Console.log('BrowserManager line 193')
 									Console.error(err)

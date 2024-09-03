@@ -93,17 +93,17 @@ const startServer = async () => {
 
 		// Spawn two worker threads
 		const worker1 = new Worker(__filename, {
-			workerData: { order: 1 },
+			workerData: { order: 1, port: 4040 },
 		})
 		_createWorkerListener(worker1)
-		// const worker2 = new Worker(__filename, {
-		// 	workerData: { order: 2 },
-		// })
-		// _createWorkerListener(worker2)
-		// const worker3 = new Worker(__filename, {
-		// 	workerData: { order: 3, port: 4042 },
-		// })
-		// _createWorkerListener(worker3)
+		const worker2 = new Worker(__filename, {
+			workerData: { order: 2, port: 4041 },
+		})
+		_createWorkerListener(worker2)
+		const worker3 = new Worker(__filename, {
+			workerData: { order: 3, port: 4042 },
+		})
+		_createWorkerListener(worker3)
 		// const worker4 = new Worker(__filename, {
 		// 	workerData: { order: 4, port: 4043 },
 		// })

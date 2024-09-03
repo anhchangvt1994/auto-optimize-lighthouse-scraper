@@ -21,7 +21,7 @@ import { hashCode } from '../utils/StringHelper'
 import { CACHEABLE_STATUS_CODE } from './constants'
 import { convertUrlHeaderToQueryString, getUrl } from './utils/ForamatUrl.uws'
 import ISRGenerator from './utils/ISRGenerator.next'
-import SSRHandler from './utils/ISRHandler.worker'
+import ISSRHandler from './utils/ISRHandler.worker'
 
 const COOKIE_EXPIRED_SECOND = COOKIE_EXPIRED / 1000
 
@@ -90,7 +90,7 @@ const puppeteerSSRService = (async () => {
 							Console.log('Request aborted')
 						})
 
-						const result = await SSRHandler({
+						const result = await ISSRHandler({
 							startGenerating,
 							hasCache: isFirstRequest,
 							url,

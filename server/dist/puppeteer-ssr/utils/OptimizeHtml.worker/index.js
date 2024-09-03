@@ -15,10 +15,15 @@ var _InitEnv = require('../../../utils/InitEnv')
 const workerManager = _WorkerManager2.default.init(
 	_path2.default.resolve(__dirname, `./worker.${_constants.resourceExtension}`),
 	{
-		minWorkers: 0,
-		maxWorkers: 1,
+		minWorkers: 1,
+		maxWorkers: 5,
 	},
-	['compressContent', 'optimizeContent', 'deepOptimizeContent']
+	[
+		'compressContent',
+		'optimizeContent',
+		'shallowOptimizeContent',
+		'deepOptimizeContent',
+	]
 )
 
 const compressContent = async (html) => {
@@ -46,7 +51,7 @@ const compressContent = async (html) => {
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result
@@ -81,12 +86,44 @@ const optimizeContent = async (html, isFullOptimize = false) => {
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result
 }
 exports.optimizeContent = optimizeContent // compressContent
+
+const shallowOptimizeContent = async (html) => {
+	if (!html || _InitEnv.PROCESS_ENV.DISABLE_OPTIMIZE) return html
+
+	const freePool = await workerManager.getFreePool({
+		delay: 500,
+	})
+	const pool = freePool.pool
+	let result
+
+	try {
+		result = await new Promise(async (res) => {
+			const timeout = setTimeout(() => res(html), 5000)
+			const tmpResult = await pool.exec('shallowOptimizeContent', [html])
+
+			clearTimeout(timeout)
+
+			res(tmpResult)
+		})
+	} catch (err) {
+		_ConsoleHandler2.default.error(err)
+		result = html
+	}
+
+	freePool.terminate({
+		force: true,
+		// delay: 0,
+	})
+
+	return result
+}
+exports.shallowOptimizeContent = shallowOptimizeContent // shallowOptimizeContent
 
 const deepOptimizeContent = async (html, isFullOptimize = false) => {
 	if (!html || _InitEnv.PROCESS_ENV.DISABLE_DEEP_OPTIMIZE) return html
@@ -113,7 +150,7 @@ const deepOptimizeContent = async (html, isFullOptimize = false) => {
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result

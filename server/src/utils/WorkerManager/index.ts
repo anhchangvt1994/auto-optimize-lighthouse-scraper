@@ -124,7 +124,6 @@ const WorkerManager = (() => {
 						_getCounterDecreased()
 
 						if (timeout) clearTimeout(timeout)
-
 						timeout = setTimeout(async () => {
 							curPool = WorkerPool.pool(workerPath, initOptions)
 							terminate = _getTerminate(curPool)
@@ -140,11 +139,8 @@ const WorkerManager = (() => {
 								}
 
 								if (!pool.stats().activeTasks) {
+									console.log(pool.stats())
 									pool.terminate(options.force)
-								} else {
-									setTimeout(() => {
-										pool.terminate(options.force)
-									}, 5000)
 								}
 							} catch (err) {
 								Console.error(err.message)

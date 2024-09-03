@@ -7,10 +7,15 @@ import { PROCESS_ENV } from '../../../utils/InitEnv'
 const workerManager = WorkerManager.init(
 	path.resolve(__dirname, `./worker.${resourceExtension}`),
 	{
-		minWorkers: 0,
-		maxWorkers: 1,
+		minWorkers: 1,
+		maxWorkers: 5,
 	},
-	['compressContent', 'optimizeContent', 'deepOptimizeContent']
+	[
+		'compressContent',
+		'optimizeContent',
+		'shallowOptimizeContent',
+		'deepOptimizeContent',
+	]
 )
 
 export const compressContent = async (html: string) => {
@@ -38,7 +43,7 @@ export const compressContent = async (html: string) => {
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result
@@ -75,11 +80,42 @@ export const optimizeContent = async (
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result
 } // compressContent
+
+export const shallowOptimizeContent = async (html: string) => {
+	if (!html || PROCESS_ENV.DISABLE_OPTIMIZE) return html
+
+	const freePool = await workerManager.getFreePool({
+		delay: 500,
+	})
+	const pool = freePool.pool
+	let result
+
+	try {
+		result = await new Promise(async (res) => {
+			const timeout = setTimeout(() => res(html), 5000)
+			const tmpResult = await pool.exec('shallowOptimizeContent', [html])
+
+			clearTimeout(timeout)
+
+			res(tmpResult)
+		})
+	} catch (err) {
+		Console.error(err)
+		result = html
+	}
+
+	freePool.terminate({
+		force: true,
+		// delay: 0,
+	})
+
+	return result
+} // shallowOptimizeContent
 
 export const deepOptimizeContent = async (
 	html: string,
@@ -109,7 +145,7 @@ export const deepOptimizeContent = async (
 
 	freePool.terminate({
 		force: true,
-		delay: 0,
+		// delay: 0,
 	})
 
 	return result
