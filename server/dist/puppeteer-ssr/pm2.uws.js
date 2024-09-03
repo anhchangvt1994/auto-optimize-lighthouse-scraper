@@ -64,7 +64,7 @@ _pm22.default.connect(false, (err) => {
 			_pm22.default.start(
 				{
 					name: 'puppeteer-ssr',
-					script: `server/${_constants.resourceDirectory}/index.uws.worker.${_constants.resourceExtension}`,
+					script: `server/${_constants.resourceDirectory}/index.uws.${_constants.resourceExtension}`,
 					instances: CLUSTER_INSTANCES,
 					exec_mode: 'cluster',
 					interpreter: './node_modules/.bin/sucrase',

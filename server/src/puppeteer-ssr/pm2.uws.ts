@@ -56,7 +56,7 @@ pm2.connect(false, (err) => {
 			pm2.start(
 				{
 					name: 'puppeteer-ssr',
-					script: `server/${resourceDirectory}/index.uws.worker.${resourceExtension}`,
+					script: `server/${resourceDirectory}/index.uws.${resourceExtension}`,
 					instances: CLUSTER_INSTANCES,
 					exec_mode: 'cluster',
 					interpreter: './node_modules/.bin/sucrase',
