@@ -144,6 +144,8 @@ const puppeteerSSRService = (async () => {
 				PROCESS_ENV.BASE_URL = `${
 					req.getHeader('x-forwarded-proto')
 						? req.getHeader('x-forwarded-proto')
+						: PROCESS_ENV.IS_SERVER
+						? 'https'
 						: 'http'
 				}://${req.getHeader('host')}`
 

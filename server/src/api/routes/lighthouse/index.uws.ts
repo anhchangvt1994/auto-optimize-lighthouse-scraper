@@ -32,6 +32,8 @@ const apiLighthouse = (() => {
 				PROCESS_ENV.BASE_URL = `${
 					req.getHeader('x-forwarded-proto')
 						? req.getHeader('x-forwarded-proto')
+						: PROCESS_ENV.IS_SERVER
+						? 'https'
 						: 'http'
 				}://${req.getHeader('host')}`
 
@@ -93,7 +95,7 @@ const apiLighthouse = (() => {
 				}
 
 				if (!res.writableEnded) {
-					const lighthouseResult = await Promise.all([
+					const lighthouseResult = await Promise.all<any>([
 						new Promise((res) => {
 							fetchData(
 								`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlParam}&strategy=mobile&category=ACCESSIBILITY&category=BEST_PRACTICES&category=PERFORMANCE&category=SEO`
