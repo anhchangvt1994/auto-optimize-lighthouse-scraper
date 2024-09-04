@@ -15,10 +15,10 @@ import {
 import { ISSRResult } from '../../types'
 import CacheManager from '../CacheManager.worker/utils'
 import {
-	compressContent,
-	shallowOptimizeContent,
 	deepOptimizeContent,
-} from '../OptimizeHtml.worker/utils'
+	shallowOptimizeContent,
+} from '../OptimizeHtml.worker'
+import { compressContent } from '../OptimizeHtml.worker/utils'
 
 interface IISRHandlerParam {
 	startGenerating: number
