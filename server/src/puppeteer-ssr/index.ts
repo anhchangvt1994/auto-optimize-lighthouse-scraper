@@ -192,7 +192,7 @@ const puppeteerSSRService = (async () => {
 												)
 
 												if (contentEncoding === 'br') return tmpContent
-												else
+												else if (tmpContent && Buffer.isBuffer(tmpContent))
 													tmpContent =
 														brotliDecompressSync(tmpContent).toString()
 
@@ -206,7 +206,8 @@ const puppeteerSSRService = (async () => {
 								} else if (result.response.indexOf('.br') !== -1) {
 									const content = fs.readFileSync(result.response)
 
-									tmpBody = brotliDecompressSync(content).toString()
+									if (content && Buffer.isBuffer(content))
+										tmpBody = brotliDecompressSync(content).toString()
 								} else {
 									tmpBody = fs.readFileSync(result.response)
 								}
@@ -234,7 +235,7 @@ const puppeteerSSRService = (async () => {
 
 								return tmpBody
 							})()
-							res.send(body) // Serve prerendered page as response.
+							res.status(result.status).send(body) // Serve prerendered page as response.
 						}
 					} catch (err) {
 						Console.error('url', url)

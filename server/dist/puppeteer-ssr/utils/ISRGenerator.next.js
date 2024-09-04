@@ -38,7 +38,7 @@ var _utils2 = _interopRequireDefault(_utils)
 var _ISRHandlerworker = require('./ISRHandler.worker')
 var _ISRHandlerworker2 = _interopRequireDefault(_ISRHandlerworker)
 
-const limitRequestToCrawl = 2
+const limitRequestToCrawl = 3
 let totalRequestsToCrawl = 0
 const waitingToCrawlList = new Map()
 const limitRequestWaitingToCrawl = 1

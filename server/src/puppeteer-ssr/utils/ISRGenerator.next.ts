@@ -17,7 +17,7 @@ interface IISRGeneratorParams {
 	isSkipWaiting?: boolean
 }
 
-const limitRequestToCrawl = 2
+const limitRequestToCrawl = 3
 let totalRequestsToCrawl = 0
 const waitingToCrawlList = new Map<string, IISRGeneratorParams>()
 const limitRequestWaitingToCrawl = 1

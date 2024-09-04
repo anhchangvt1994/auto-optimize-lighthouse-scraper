@@ -215,7 +215,6 @@ export const shallowOptimizeContent = async (html: string) => {
 		.replace(regexRemoveScriptTag, '')
 		.replace(regexRemoveSpecialTag, '')
 		.replace(regexRemoveIconTagFirst, '')
-		.replace(regexRemoveClassAndStyleAttrs, '')
 		.replace(regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
 			let newAttrs = curAttrs
 
@@ -252,6 +251,42 @@ export const shallowOptimizeContent = async (html: string) => {
 
 			return `<img ${newAttrs}>`
 		})
+		.replace(regexRemoveClassAndStyleAttrs, '')
+		.replace(
+			regexHandleAttrsInteractiveTag,
+			(math, tag, curAttrs, negative, content, endTag) => {
+				let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
+				let newTag = tag
+				let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
+				let tmpContent = content
+				let result
+
+				switch (true) {
+					case newTag === 'a' && !curAttrs.includes('href='):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs}`
+						tmpEndTag = 'button'
+						break
+					case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs.replace(
+							/href(\s|$)|href=""/g,
+							''
+						)}`
+						tmpEndTag = 'button'
+						break
+					default:
+						break
+				}
+
+				result =
+					result || tmpEndTag
+						? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
+						: `<${newTag} ${negative} ${newAttrs}>`
+
+				return result
+			}
+		)
 
 	return html
 } // shallowOptimizeContent
@@ -274,29 +309,11 @@ export const deepOptimizeContent = async (html: string) => {
 			.replace(
 				regexHandleAttrsInteractiveTag,
 				(math, tag, curAttrs, negative, content, endTag) => {
-					let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
+					let newAttrs = curAttrs.trim()
 					let newTag = tag
 					let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
 					let tmpContent = content
 					let result
-
-					switch (true) {
-						case newTag === 'a' && !curAttrs.includes('href='):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs}`
-							tmpEndTag = 'button'
-							break
-						case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs.replace(
-								/href(\s|$)|href=""/g,
-								''
-							)}`
-							tmpEndTag = 'button'
-							break
-						default:
-							break
-					}
 
 					switch (true) {
 						case newTag === 'a':

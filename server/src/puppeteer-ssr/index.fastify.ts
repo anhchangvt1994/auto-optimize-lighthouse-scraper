@@ -194,7 +194,7 @@ const puppeteerSSRService = (async () => {
 													)
 
 													if (contentEncoding === 'br') return tmpContent
-													else
+													else if (tmpContent && Buffer.isBuffer(tmpContent))
 														tmpContent =
 															brotliDecompressSync(tmpContent).toString()
 
@@ -208,7 +208,8 @@ const puppeteerSSRService = (async () => {
 									} else if (result.response.indexOf('.br') !== -1) {
 										const content = fs.readFileSync(result.response)
 
-										tmpBody = brotliDecompressSync(content).toString()
+										if (content && Buffer.isBuffer(content))
+											tmpBody = brotliDecompressSync(content).toString()
 									} else {
 										tmpBody = fs.readFileSync(result.response)
 									}

@@ -342,7 +342,10 @@ const puppeteerSSRService = (async () => {
 															)
 
 															if (contentEncoding === 'br') return tmpContent
-															else
+															else if (
+																tmpContent &&
+																Buffer.isBuffer(tmpContent)
+															)
 																tmpContent = _zlib.brotliDecompressSync
 																	.call(void 0, tmpContent)
 																	.toString()
@@ -362,9 +365,11 @@ const puppeteerSSRService = (async () => {
 													result.response
 												)
 
-												tmpBody = _zlib.brotliDecompressSync
-													.call(void 0, content)
-													.toString()
+												if (content && Buffer.isBuffer(content)) {
+													tmpBody = _zlib.brotliDecompressSync
+														.call(void 0, content)
+														.toString()
+												}
 											} else {
 												tmpBody = _fs2.default.readFileSync(result.response)
 											}
@@ -416,7 +421,7 @@ const puppeteerSSRService = (async () => {
 									res.end(body || '', true)
 								} else {
 									res
-										// .writeStatus(String(result.status))
+										.writeStatus(String(result.status))
 										.writeHeader('Content-Type', 'text/html; charset=utf-8')
 
 									// if (enableContentEncoding && result.status === 200) {
