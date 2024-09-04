@@ -221,7 +221,7 @@ function BrowserManager(): IBrowser | undefined {
 
 			if (browserLaunch) {
 				try {
-					// let tabsClosed = 0
+					let tabsClosed = 0
 					const browser: Browser = (await browserLaunch) as Browser
 
 					browserStore.wsEndpoint = browser.wsEndpoint()
@@ -233,7 +233,7 @@ function BrowserManager(): IBrowser | undefined {
 					let closeBrowserTimeout: NodeJS.Timeout
 
 					browser.on('closePage', async (url) => {
-						// tabsClosed++
+						tabsClosed++
 						const currentWsEndpoint = getStore('browser').wsEndpoint
 
 						if (!SERVER_LESS && currentWsEndpoint !== browser.wsEndpoint()) {
@@ -242,13 +242,20 @@ function BrowserManager(): IBrowser | undefined {
 									// if (closePageTimeout) clearTimeout(closePageTimeout)
 
 									if (closeBrowserTimeout) clearTimeout(closeBrowserTimeout)
-									closeBrowserTimeout = setTimeout(() => {
-										if (!browser.connected) return
+									if (tabsClosed === maxRequestPerBrowser) {
 										browser.close().then(() => {
 											browser.emit('closed', true)
 											Console.log('Browser closed')
 										})
-									}, 20000)
+									} else {
+										closeBrowserTimeout = setTimeout(() => {
+											if (!browser.connected) return
+											browser.close().then(() => {
+												browser.emit('closed', true)
+												Console.log('Browser closed')
+											})
+										}, 60000)
+									}
 								} catch (err) {
 									Console.log('BrowserManager line 193')
 									Console.error(err)

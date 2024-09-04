@@ -1,7 +1,7 @@
 import chokidar from 'chokidar'
 import path from 'path'
 import pm2 from 'pm2'
-import { resourceExtension, resourceDirectory } from '../constants'
+import { resourceDirectory, resourceExtension } from '../constants'
 import Console from '../utils/ConsoleHandler'
 import { PROCESS_ENV } from '../utils/InitEnv'
 

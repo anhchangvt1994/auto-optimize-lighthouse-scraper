@@ -245,7 +245,7 @@ function BrowserManager() {
 
 			if (browserLaunch) {
 				try {
-					// let tabsClosed = 0
+					let tabsClosed = 0
 					const browser = await browserLaunch
 
 					browserStore.wsEndpoint = browser.wsEndpoint()
@@ -261,7 +261,7 @@ function BrowserManager() {
 					let closeBrowserTimeout
 
 					browser.on('closePage', async (url) => {
-						// tabsClosed++
+						tabsClosed++
 						const currentWsEndpoint = _store.getStore.call(
 							void 0,
 							'browser'
@@ -276,13 +276,20 @@ function BrowserManager() {
 									// if (closePageTimeout) clearTimeout(closePageTimeout)
 
 									if (closeBrowserTimeout) clearTimeout(closeBrowserTimeout)
-									closeBrowserTimeout = setTimeout(() => {
-										if (!browser.connected) return
+									if (tabsClosed === maxRequestPerBrowser) {
 										browser.close().then(() => {
 											browser.emit('closed', true)
 											_ConsoleHandler2.default.log('Browser closed')
 										})
-									}, 20000)
+									} else {
+										closeBrowserTimeout = setTimeout(() => {
+											if (!browser.connected) return
+											browser.close().then(() => {
+												browser.emit('closed', true)
+												_ConsoleHandler2.default.log('Browser closed')
+											})
+										}, 60000)
+									}
 								} catch (err) {
 									_ConsoleHandler2.default.log('BrowserManager line 193')
 									_ConsoleHandler2.default.error(err)
