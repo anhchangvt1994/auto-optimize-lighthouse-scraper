@@ -14,11 +14,11 @@ import {
 } from '../../constants'
 import { ISSRResult } from '../../types'
 import CacheManager from '../CacheManager.worker/utils'
-import { compressContent } from '../OptimizeHtml.worker/utils'
 import {
+	compressContent,
 	shallowOptimizeContent,
 	deepOptimizeContent,
-} from '../OptimizeHtml.worker'
+} from '../OptimizeHtml.worker/utils'
 
 interface IISRHandlerParam {
 	startGenerating: number
@@ -82,13 +82,13 @@ const fetchData = async (
 
 const waitResponse = (() => {
 	const firstWaitingDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const defaultRequestWaitingDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestServedFromCacheDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const requestFailDuration =
-		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
+		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
 	const maximumTimeout =
 		BANDWIDTH_LEVEL > BANDWIDTH_LEVEL_LIST.ONE ? 15000 : 15000
 
