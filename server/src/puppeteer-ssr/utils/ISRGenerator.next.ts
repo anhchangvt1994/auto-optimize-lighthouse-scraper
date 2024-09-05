@@ -223,6 +223,9 @@ const SSRGenerator = async ({
 			const isValidToScraping = NonNullableResult.isInit
 
 			if (isValidToScraping) {
+				await cacheManager.remove(ISRHandlerParams.url)
+				cacheManager.get()
+
 				if (waitingToCrawlList.has(ISRHandlerParams.url)) {
 					waitingToCrawlList.delete(ISRHandlerParams.url)
 				}
@@ -337,9 +340,14 @@ const SSRGenerator = async ({
 								: 200
 
 						setTimeout(async () => {
-							const tmpResult = await cacheManager.achieve()
+							const tmpResult = await cacheManager.get()
 
-							if (tmpResult && tmpResult.response) return res(tmpResult)
+							if (tmpResult) {
+								if (tmpResult.response && tmpResult.status === 200)
+									return res(tmpResult)
+								else if (tmpResult.isInit)
+									res(await SSRGenerator(ISRHandlerParams))
+							}
 
 							waitingDuration += duration
 

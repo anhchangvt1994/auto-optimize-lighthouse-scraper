@@ -15,10 +15,10 @@ import {
 import { ISSRResult } from '../../types'
 import CacheManager from '../CacheManager.worker/utils'
 import {
-	deepOptimizeContent,
+	compressContent,
 	shallowOptimizeContent,
-} from '../OptimizeHtml.worker'
-import { compressContent } from '../OptimizeHtml.worker/utils'
+	deepOptimizeContent,
+} from '../OptimizeHtml.worker/utils'
 
 interface IISRHandlerParam {
 	startGenerating: number
@@ -276,6 +276,7 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 				status = result.status
 				html = result.data
 			}
+
 			Console.log('External crawler status: ', status)
 		} catch (err) {
 			enableOptimizeAndCompressIfRemoteCrawlerFail = true
@@ -391,6 +392,11 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 
 	let result: ISSRResult
 	if (CACHEABLE_STATUS_CODE[status]) {
+		WorkerPool.workerEmit({
+			name: 'html',
+			value: html,
+		})
+
 		const pathname = new URL(url).pathname
 		const enableToOptimize =
 			(ServerConfig.crawl.routes[pathname]?.optimize ||
@@ -408,14 +414,14 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 		try {
 			if (enableToOptimize) html = await shallowOptimizeContent(html)
 
+			if (enableToCompress) html = await compressContent(html)
+
 			WorkerPool.workerEmit({
 				name: 'html',
 				value: html,
 			})
 
 			if (enableToOptimize) html = await deepOptimizeContent(html)
-
-			if (enableToCompress) html = await compressContent(html)
 			// console.log('finish optimize and compress: ', url.split('?')[0])
 			// console.log('-------')
 		} catch (err) {

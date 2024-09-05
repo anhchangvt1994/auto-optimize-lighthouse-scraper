@@ -15,6 +15,8 @@ var _BrowserManager2 = _interopRequireDefault(_BrowserManager)
 var _utils = require('../CacheManager.worker/utils')
 var _utils2 = _interopRequireDefault(_utils)
 
+var _serverconfig = require('../../../server.config')
+var _serverconfig2 = _interopRequireDefault(_serverconfig)
 const { parentPort, isMainThread } = require('worker_threads')
 
 const workerManager = _WorkerManager2.default.init(
@@ -38,16 +40,10 @@ const ISRHandler = async (params) => {
 
 	const browser = await browserManager.get()
 
-	if (!browser || !browser.connected) {
-		freePool.terminate({
-			force: true,
-		})
-		return
-	}
+	const wsEndpoint =
+		browser && browser.connected ? browser.wsEndpoint() : undefined
 
-	const wsEndpoint = browser.wsEndpoint()
-
-	if (!wsEndpoint) {
+	if (!wsEndpoint && !_serverconfig2.default.crawler) {
 		freePool.terminate({
 			force: true,
 		})
@@ -74,7 +70,7 @@ const ISRHandler = async (params) => {
 				} else {
 					res(undefined)
 				}
-			}, 40000)
+			}, 30000)
 			try {
 				const tmpResult = await pool.exec(
 					'ISRHandler',

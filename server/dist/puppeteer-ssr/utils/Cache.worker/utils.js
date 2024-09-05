@@ -219,7 +219,15 @@ const get = async (url, options) => {
 			),
 			ttRenderMs: 200,
 			available: false,
-			isInit: false,
+			isInit:
+				Date.now() -
+					new Date(
+						_nullishCoalesce(
+							_optionalChain([info, 'optionalAccess', (_5) => _5.createdAt]),
+							() => curTime
+						)
+					).getTime() >=
+				32000,
 			isRaw,
 		}
 	}
@@ -334,15 +342,24 @@ exports.renew = renew // renew
 const remove = (url) => {
 	if (!url) return _ConsoleHandler2.default.log('Url can not empty!')
 	const key = exports.getKey.call(void 0, url)
-	let file = `${_constants.pagesPath}/${key}.raw.br`
 
-	if (!_fs2.default.existsSync(file)) {
-		_ConsoleHandler2.default.log('Does not exist file reference url!')
-		return
-	}
+	const curFile = (() => {
+		switch (true) {
+			case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.raw.br`):
+				return `${_constants.pagesPath}/${key}.raw.br`
+			case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.br`):
+				return `${_constants.pagesPath}/${key}.br`
+			case _fs2.default.existsSync(`${_constants.pagesPath}/${key}.renew.br`):
+				return `${_constants.pagesPath}/${key}.renew.br`
+			default:
+				return
+		}
+	})()
+
+	if (!curFile) return
 
 	try {
-		_fs2.default.unlinkSync(file)
+		_fs2.default.unlinkSync(curFile)
 	} catch (err) {
 		console.error(err)
 		throw err
@@ -383,4 +400,4 @@ const rename = (params) => {
 		}
 	}
 }
-exports.rename = rename // renew
+exports.rename = rename // rename

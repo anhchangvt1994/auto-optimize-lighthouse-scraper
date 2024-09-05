@@ -186,7 +186,8 @@ export const get = async (
 			requestedAt: info?.requestedAt ?? curTime,
 			ttRenderMs: 200,
 			available: false,
-			isInit: false,
+			isInit:
+				Date.now() - new Date(info?.createdAt ?? curTime).getTime() >= 32000,
 			isRaw,
 		}
 	}
@@ -299,15 +300,24 @@ export const renew = async (url) => {
 export const remove = (url: string) => {
 	if (!url) return Console.log('Url can not empty!')
 	const key = getKey(url)
-	let file = `${pagesPath}/${key}.raw.br`
 
-	if (!fs.existsSync(file)) {
-		Console.log('Does not exist file reference url!')
-		return
-	}
+	const curFile = (() => {
+		switch (true) {
+			case fs.existsSync(`${pagesPath}/${key}.raw.br`):
+				return `${pagesPath}/${key}.raw.br`
+			case fs.existsSync(`${pagesPath}/${key}.br`):
+				return `${pagesPath}/${key}.br`
+			case fs.existsSync(`${pagesPath}/${key}.renew.br`):
+				return `${pagesPath}/${key}.renew.br`
+			default:
+				return
+		}
+	})()
+
+	if (!curFile) return
 
 	try {
-		fs.unlinkSync(file)
+		fs.unlinkSync(curFile)
 	} catch (err) {
 		console.error(err)
 		throw err
@@ -343,4 +353,4 @@ export const rename = (params: { url: string; type?: 'raw' | 'renew' }) => {
 			return
 		}
 	}
-} // renew
+} // rename

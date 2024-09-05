@@ -50,7 +50,6 @@ var _constants3 = require('../../constants')
 var _utils = require('../CacheManager.worker/utils')
 var _utils2 = _interopRequireDefault(_utils)
 
-var _OptimizeHtmlworker = require('../OptimizeHtml.worker')
 var _utils3 = require('../OptimizeHtml.worker/utils')
 
 const _getRestOfDuration = (startGenerating, gapDuration = 0) => {
@@ -397,6 +396,7 @@ const ISRHandler = async (params) => {
 				status = result.status
 				html = result.data
 			}
+
 			_ConsoleHandler2.default.log('External crawler status: ', status)
 		} catch (err) {
 			enableOptimizeAndCompressIfRemoteCrawlerFail = true
@@ -606,6 +606,11 @@ const ISRHandler = async (params) => {
 
 	let result
 	if (_constants3.CACHEABLE_STATUS_CODE[status]) {
+		_workerpool2.default.workerEmit({
+			name: 'html',
+			value: html,
+		})
+
 		const pathname = new URL(url).pathname
 		const enableToOptimize =
 			(_optionalChain([
@@ -662,10 +667,10 @@ const ISRHandler = async (params) => {
 		let isRaw = false
 		try {
 			if (enableToOptimize)
-				html = await _OptimizeHtmlworker.shallowOptimizeContent.call(
-					void 0,
-					html
-				)
+				html = await _utils3.shallowOptimizeContent.call(void 0, html)
+
+			if (enableToCompress)
+				html = await _utils3.compressContent.call(void 0, html)
 
 			_workerpool2.default.workerEmit({
 				name: 'html',
@@ -673,10 +678,7 @@ const ISRHandler = async (params) => {
 			})
 
 			if (enableToOptimize)
-				html = await _OptimizeHtmlworker.deepOptimizeContent.call(void 0, html)
-
-			if (enableToCompress)
-				html = await _utils3.compressContent.call(void 0, html)
+				html = await _utils3.deepOptimizeContent.call(void 0, html)
 			// console.log('finish optimize and compress: ', url.split('?')[0])
 			// console.log('-------')
 		} catch (err) {

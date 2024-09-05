@@ -5,6 +5,7 @@ import WorkerManager from '../../../utils/WorkerManager'
 import BrowserManager from '../BrowserManager'
 import CacheManager from '../CacheManager.worker/utils'
 import { type IISRHandlerWorkerParam } from './types'
+import ServerConfig from '../../../server.config'
 const { parentPort, isMainThread } = require('worker_threads')
 
 const workerManager = WorkerManager.init(
@@ -28,16 +29,10 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 
 	const browser = await browserManager.get()
 
-	if (!browser || !browser.connected) {
-		freePool.terminate({
-			force: true,
-		})
-		return
-	}
+	const wsEndpoint =
+		browser && browser.connected ? browser.wsEndpoint() : undefined
 
-	const wsEndpoint = browser.wsEndpoint()
-
-	if (!wsEndpoint) {
+	if (!wsEndpoint && !ServerConfig.crawler) {
 		freePool.terminate({
 			force: true,
 		})
@@ -64,7 +59,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 				} else {
 					res(undefined)
 				}
-			}, 40000)
+			}, 30000)
 			try {
 				const tmpResult = await pool.exec(
 					'ISRHandler',
