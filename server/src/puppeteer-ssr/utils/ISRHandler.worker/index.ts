@@ -59,7 +59,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 				} else {
 					res(undefined)
 				}
-			}, 30000)
+			}, 40000)
 			try {
 				const tmpResult = await pool.exec(
 					'ISRHandler',

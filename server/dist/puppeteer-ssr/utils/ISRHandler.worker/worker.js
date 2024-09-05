@@ -49,8 +49,9 @@ var _constants3 = require('../../constants')
 
 var _utils = require('../CacheManager.worker/utils')
 var _utils2 = _interopRequireDefault(_utils)
-
 var _utils3 = require('../OptimizeHtml.worker/utils')
+
+var _OptimizeHtmlworker = require('../OptimizeHtml.worker')
 
 const _getRestOfDuration = (startGenerating, gapDuration = 0) => {
 	if (!startGenerating) return 0
@@ -105,13 +106,13 @@ const fetchData = async (input, init, reqData) => {
 
 const waitResponse = (() => {
 	const firstWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
 	const defaultRequestWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
 	const requestServedFromCacheDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
 	const requestFailDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 250 : 500
 	const maximumTimeout =
 		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
 			? 15000
@@ -667,7 +668,10 @@ const ISRHandler = async (params) => {
 		let isRaw = false
 		try {
 			if (enableToOptimize)
-				html = await _utils3.shallowOptimizeContent.call(void 0, html)
+				html = await _OptimizeHtmlworker.shallowOptimizeContent.call(
+					void 0,
+					html
+				)
 
 			if (enableToCompress)
 				html = await _utils3.compressContent.call(void 0, html)
@@ -678,7 +682,7 @@ const ISRHandler = async (params) => {
 			})
 
 			if (enableToOptimize)
-				html = await _utils3.deepOptimizeContent.call(void 0, html)
+				html = await _OptimizeHtmlworker.deepOptimizeContent.call(void 0, html)
 			// console.log('finish optimize and compress: ', url.split('?')[0])
 			// console.log('-------')
 		} catch (err) {
