@@ -105,13 +105,21 @@ const fetchData = async (input, init, reqData) => {
 
 const waitResponse = (() => {
 	const firstWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
+			? 1000
+			: 500
 	const defaultRequestWaitingDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
+			? 1000
+			: 500
 	const requestServedFromCacheDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
+			? 1000
+			: 500
 	const requestFailDuration =
-		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE ? 500 : 500
+		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
+			? 1000
+			: 500
 	const maximumTimeout =
 		_constants.BANDWIDTH_LEVEL > _constants.BANDWIDTH_LEVEL_LIST.ONE
 			? 15000
