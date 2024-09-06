@@ -482,20 +482,21 @@ const ISRHandler = async (params) => {
 						_43('request', (req) => {
 							const resourceType = req.resourceType()
 
-							// if (resourceType === 'stylesheet') {
-							// 	req.respond({ status: 200, body: 'aborted' })
-							// } else if (
-							// 	/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(url) ||
-							// 	/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
-							// 		req.url()
-							// 	) ||
-							// 	['font', 'image', 'media', 'imageset'].includes(resourceType)
-							// ) {
-							// 	req.abort()
-							// } else {
-							// 	req.continue()
-							// }
-							req.continue()
+							if (resourceType === 'stylesheet') {
+								req.respond({ status: 200, body: 'aborted' })
+							} else if (
+								/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(
+									url
+								) ||
+								/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
+									req.url()
+								) ||
+								['font', 'image', 'media', 'imageset'].includes(resourceType)
+							) {
+								req.abort()
+							} else {
+								req.continue()
+							}
 						}),
 				])
 
