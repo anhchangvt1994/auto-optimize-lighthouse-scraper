@@ -13,7 +13,7 @@ export interface IServerConfigOptional {
 		}
 
 		custom?: (
-			path: string
+			url: string
 		) => Omit<NonNullable<IServerConfigOptional['locale']>, 'routes' | 'custom'>
 	}
 
@@ -46,7 +46,7 @@ export interface IServerConfigOptional {
 			}
 		}
 
-		custom?: (path: string) => Omit<
+		custom?: (url: string) => Omit<
 			NonNullable<IServerConfigOptional['crawl']>,
 			'routes' | 'custom' | 'cache' | 'content'
 		> & {
@@ -54,6 +54,12 @@ export interface IServerConfigOptional {
 				NonNullable<NonNullable<IServerConfigOptional['crawl']>>['cache'],
 				'time'
 			>
+			onContentCrawled?: (payload: { html: string }) => string | void
+		}
+	}
+	routes?: {
+		[key: string]: {
+			pointsTo?: string
 		}
 	}
 	crawler?: string
@@ -86,7 +92,7 @@ export interface IServerConfig extends IServerConfigOptional {
 		}
 
 		custom?: (
-			path: string
+			url: string
 		) => Omit<NonNullable<IServerConfig['locale']>, 'routes' | 'custom'>
 	}
 
@@ -116,11 +122,12 @@ export interface IServerConfig extends IServerConfigOptional {
 			}
 		}
 
-		custom?: (path: string) => Omit<
+		custom?: (url: string) => Omit<
 			IServerConfig['crawl'],
 			'routes' | 'custom' | 'cache' | 'content'
 		> & {
 			cache: Omit<IServerConfig['crawl']['cache'], 'time'>
+			onContentCrawled?: (payload: { html: string }) => string | void
 		}
 	}
 

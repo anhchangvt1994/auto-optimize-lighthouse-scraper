@@ -482,21 +482,20 @@ const ISRHandler = async (params) => {
 						_43('request', (req) => {
 							const resourceType = req.resourceType()
 
-							if (resourceType === 'stylesheet') {
-								req.respond({ status: 200, body: 'aborted' })
-							} else if (
-								/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(
-									url
-								) ||
-								/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
-									req.url()
-								) ||
-								['font', 'image', 'media', 'imageset'].includes(resourceType)
-							) {
-								req.abort()
-							} else {
-								req.continue()
-							}
+							// if (resourceType === 'stylesheet') {
+							// 	req.respond({ status: 200, body: 'aborted' })
+							// } else if (
+							// 	/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(url) ||
+							// 	/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
+							// 		req.url()
+							// 	) ||
+							// 	['font', 'image', 'media', 'imageset'].includes(resourceType)
+							// ) {
+							// 	req.abort()
+							// } else {
+							// 	req.continue()
+							// }
+							req.continue()
 						}),
 				])
 
@@ -576,6 +575,10 @@ const ISRHandler = async (params) => {
 					]),
 					async () => ''
 				) // serialized HTML of page DOM.
+				// safePage()?.close()
+			} catch (err) {
+				_ConsoleHandler2.default.log('ISRHandler line 315:')
+				_ConsoleHandler2.default.error(err)
 				_optionalChain([
 					safePage,
 					'call',
@@ -584,18 +587,6 @@ const ISRHandler = async (params) => {
 					(_56) => _56.close,
 					'call',
 					(_57) => _57(),
-				])
-			} catch (err) {
-				_ConsoleHandler2.default.log('ISRHandler line 315:')
-				_ConsoleHandler2.default.error(err)
-				_optionalChain([
-					safePage,
-					'call',
-					(_58) => _58(),
-					'optionalAccess',
-					(_59) => _59.close,
-					'call',
-					(_60) => _60(),
 				])
 				if (params.hasCache) {
 					cacheManager.rename({
@@ -620,60 +611,58 @@ const ISRHandler = async (params) => {
 		})
 
 		const pathname = new URL(url).pathname
-		const enableToOptimize =
-			(_optionalChain([
-				_serverconfig2.default,
-				'access',
-				(_61) => _61.crawl,
-				'access',
-				(_62) => _62.routes,
-				'access',
-				(_63) => _63[pathname],
-				'optionalAccess',
-				(_64) => _64.optimize,
-			]) ||
-				_optionalChain([
-					_serverconfig2.default,
-					'access',
-					(_65) => _65.crawl,
-					'access',
-					(_66) => _66.custom,
-					'optionalCall',
-					(_67) => _67(pathname),
-					'optionalAccess',
-					(_68) => _68.optimize,
-				]) ||
-				_serverconfig2.default.crawl.optimize) &&
-			enableOptimizeAndCompressIfRemoteCrawlerFail
 
-		const enableToCompress =
-			(_optionalChain([
-				_serverconfig2.default,
-				'access',
-				(_69) => _69.crawl,
-				'access',
-				(_70) => _70.routes,
-				'access',
-				(_71) => _71[pathname],
-				'optionalAccess',
-				(_72) => _72.compress,
-			]) ||
-				_optionalChain([
-					_serverconfig2.default,
-					'access',
-					(_73) => _73.crawl,
-					'access',
-					(_74) => _74.custom,
-					'optionalCall',
-					(_75) => _75(pathname),
-					'optionalAccess',
-					(_76) => _76.compress,
-				]) ||
-				_serverconfig2.default.crawl.compress) &&
-			enableOptimizeAndCompressIfRemoteCrawlerFail
+		const crawlCustomOption = _optionalChain([
+			_serverconfig2.default,
+			'access',
+			(_58) => _58.crawl,
+			'access',
+			(_59) => _59.custom,
+			'optionalCall',
+			(_60) => _60(url),
+		])
+
+		const enableToOptimize = (() => {
+			const options = _nullishCoalesce(
+				_nullishCoalesce(
+					crawlCustomOption,
+					() => _serverconfig2.default.crawl.routes[pathname]
+				),
+				() => _serverconfig2.default.crawl
+			)
+
+			return options.optimize && enableOptimizeAndCompressIfRemoteCrawlerFail
+		})()
+
+		const enableToCompress = (() => {
+			const options = _nullishCoalesce(
+				_nullishCoalesce(
+					_optionalChain([
+						_serverconfig2.default,
+						'access',
+						(_61) => _61.crawl,
+						'access',
+						(_62) => _62.custom,
+						'optionalCall',
+						(_63) => _63(url),
+					]),
+					() => _serverconfig2.default.crawl.routes[pathname]
+				),
+				() => _serverconfig2.default.crawl
+			)
+
+			return options.compress && enableOptimizeAndCompressIfRemoteCrawlerFail
+		})()
 
 		let isRaw = false
 		try {
+			if (
+				crawlCustomOption &&
+				typeof crawlCustomOption.onContentCrawled === 'function'
+			) {
+				html = crawlCustomOption.onContentCrawled({ html })
+			}
+
 			if (enableToOptimize)
 				html = await _utils3.shallowOptimizeContent.call(void 0, html)
 

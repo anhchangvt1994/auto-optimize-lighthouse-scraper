@@ -21,6 +21,7 @@ export const defineServerConfig = (options: IServerConfigOptional) => {
 						defaultCountry: tmpOptionCastingType.defaultCountry,
 						hideDefaultLocale: tmpOptionCastingType.hideDefaultLocale,
 						routes: tmpOptionCastingType.routes || {},
+						custom: tmpOptionCastingType.custom,
 					}
 
 					for (const localeRouteKey in serverConfigDefined[key].routes) {
@@ -80,6 +81,7 @@ export const defineServerConfig = (options: IServerConfigOptional) => {
 										defaultServerConfig[key].cache.renewTime,
 							  },
 					routes: tmpOptionCastingType.routes || {},
+					custom: tmpOptionCastingType.custom,
 				}
 
 				for (const localeRouteKey in serverConfigDefined[key].routes) {

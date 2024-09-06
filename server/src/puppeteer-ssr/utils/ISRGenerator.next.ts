@@ -346,7 +346,12 @@ const SSRGenerator = async ({
 								if (tmpResult.response && tmpResult.status === 200)
 									return res(tmpResult)
 								else if (tmpResult.isInit)
-									res(await SSRGenerator(ISRHandlerParams))
+									res(
+										await SSRGenerator({
+											...ISRHandlerParams,
+											forceToCrawl: true,
+										})
+									)
 							}
 
 							waitingDuration += duration

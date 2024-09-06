@@ -316,19 +316,20 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 				safePage()?.on('request', (req) => {
 					const resourceType = req.resourceType()
 
-					if (resourceType === 'stylesheet') {
-						req.respond({ status: 200, body: 'aborted' })
-					} else if (
-						/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(url) ||
-						/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
-							req.url()
-						) ||
-						['font', 'image', 'media', 'imageset'].includes(resourceType)
-					) {
-						req.abort()
-					} else {
-						req.continue()
-					}
+					// if (resourceType === 'stylesheet') {
+					// 	req.respond({ status: 200, body: 'aborted' })
+					// } else if (
+					// 	/(socket.io.min.js)+(?:$)|data:image\/[a-z]*.?\;base64/.test(url) ||
+					// 	/googletagmanager.com|connect.facebook.net|asia.creativecdn.com|static.hotjar.com|deqik.com|contineljs.com|googleads.g.doubleclick.net|analytics.tiktok.com|google.com|gstatic.com|static.airbridge.io|googleadservices.com|google-analytics.com|sg.mmstat.com|t.contentsquare.net|accounts.google.com|browser.sentry-cdn.com|bat.bing.com|tr.snapchat.com|ct.pinterest.com|criteo.com|webchat.caresoft.vn|tags.creativecdn.com|script.crazyegg.com|tags.tiqcdn.com|trc.taboola.com|securepubads.g.doubleclick.net|partytown/.test(
+					// 		req.url()
+					// 	) ||
+					// 	['font', 'image', 'media', 'imageset'].includes(resourceType)
+					// ) {
+					// 	req.abort()
+					// } else {
+					// 	req.continue()
+					// }
+					req.continue()
 				})
 
 				await safePage()?.setExtraHTTPHeaders({
@@ -370,7 +371,7 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 
 			try {
 				html = (await safePage()?.content()) ?? '' // serialized HTML of page DOM.
-				safePage()?.close()
+				// safePage()?.close()
 			} catch (err) {
 				Console.log('ISRHandler line 315:')
 				Console.error(err)
@@ -398,20 +399,36 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 		})
 
 		const pathname = new URL(url).pathname
-		const enableToOptimize =
-			(ServerConfig.crawl.routes[pathname]?.optimize ||
-				ServerConfig.crawl.custom?.(pathname)?.optimize ||
-				ServerConfig.crawl.optimize) &&
-			enableOptimizeAndCompressIfRemoteCrawlerFail
 
-		const enableToCompress =
-			(ServerConfig.crawl.routes[pathname]?.compress ||
-				ServerConfig.crawl.custom?.(pathname)?.compress ||
-				ServerConfig.crawl.compress) &&
-			enableOptimizeAndCompressIfRemoteCrawlerFail
+		const crawlCustomOption = ServerConfig.crawl.custom?.(url)
+
+		const enableToOptimize = (() => {
+			const options =
+				crawlCustomOption ??
+				ServerConfig.crawl.routes[pathname] ??
+				ServerConfig.crawl
+
+			return options.optimize && enableOptimizeAndCompressIfRemoteCrawlerFail
+		})()
+
+		const enableToCompress = (() => {
+			const options =
+				ServerConfig.crawl.custom?.(url) ??
+				ServerConfig.crawl.routes[pathname] ??
+				ServerConfig.crawl
+
+			return options.compress && enableOptimizeAndCompressIfRemoteCrawlerFail
+		})()
 
 		let isRaw = false
 		try {
+			if (
+				crawlCustomOption &&
+				typeof crawlCustomOption.onContentCrawled === 'function'
+			) {
+				html = crawlCustomOption.onContentCrawled({ html }) as string
+			}
+
 			if (enableToOptimize) html = await shallowOptimizeContent(html)
 
 			if (enableToCompress) html = await compressContent(html)
