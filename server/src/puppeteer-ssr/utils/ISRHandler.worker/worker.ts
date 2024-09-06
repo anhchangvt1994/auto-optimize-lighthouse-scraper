@@ -371,7 +371,7 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 
 			try {
 				html = (await safePage()?.content()) ?? '' // serialized HTML of page DOM.
-				// safePage()?.close()
+				safePage()?.close()
 			} catch (err) {
 				Console.log('ISRHandler line 315:')
 				Console.error(err)

@@ -43,6 +43,7 @@ const ServerConfig = defineServerConfig({
                       position: sticky;
                       top: 24px;
                       margin-top: 24px !important;
+                      z-index: 10;
                     }
                     a[href="/login?return_to=https%3A%2F%2Fgithub.com%2Fanhchangvt1994"] {
                       display: none !important;

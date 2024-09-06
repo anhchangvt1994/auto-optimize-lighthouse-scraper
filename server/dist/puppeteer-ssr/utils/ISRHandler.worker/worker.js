@@ -575,10 +575,6 @@ const ISRHandler = async (params) => {
 					]),
 					async () => ''
 				) // serialized HTML of page DOM.
-				// safePage()?.close()
-			} catch (err) {
-				_ConsoleHandler2.default.log('ISRHandler line 315:')
-				_ConsoleHandler2.default.error(err)
 				_optionalChain([
 					safePage,
 					'call',
@@ -587,6 +583,18 @@ const ISRHandler = async (params) => {
 					(_56) => _56.close,
 					'call',
 					(_57) => _57(),
+				])
+			} catch (err) {
+				_ConsoleHandler2.default.log('ISRHandler line 315:')
+				_ConsoleHandler2.default.error(err)
+				_optionalChain([
+					safePage,
+					'call',
+					(_58) => _58(),
+					'optionalAccess',
+					(_59) => _59.close,
+					'call',
+					(_60) => _60(),
 				])
 				if (params.hasCache) {
 					cacheManager.rename({
@@ -615,11 +623,11 @@ const ISRHandler = async (params) => {
 		const crawlCustomOption = _optionalChain([
 			_serverconfig2.default,
 			'access',
-			(_58) => _58.crawl,
+			(_61) => _61.crawl,
 			'access',
-			(_59) => _59.custom,
+			(_62) => _62.custom,
 			'optionalCall',
-			(_60) => _60(url),
+			(_63) => _63(url),
 		])
 
 		const enableToOptimize = (() => {
@@ -640,11 +648,11 @@ const ISRHandler = async (params) => {
 					_optionalChain([
 						_serverconfig2.default,
 						'access',
-						(_61) => _61.crawl,
+						(_64) => _64.crawl,
 						'access',
-						(_62) => _62.custom,
+						(_65) => _65.custom,
 						'optionalCall',
-						(_63) => _63(url),
+						(_66) => _66(url),
 					]),
 					() => _serverconfig2.default.crawl.routes[pathname]
 				),
