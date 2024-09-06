@@ -89,7 +89,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 							)
 							.replace(
 								/https:\/\/github.githubassets.com\/favicons\/favicon.png|https:\/\/github.githubassets.com\/favicons\/favicon.svg|https:\/\/github.githubassets.com\/assets\/pinned-octocat-093da3e6fa40.svg|https:\/\/github.com\/fluidicon.png/g,
-								'/images/anhchangvt1994-avatar-rounded.ico'
+								'/images/anhchangvt1994-avatar-rounded-v1.svg'
 							)
 							.replace(/<a\s/g, '<a target="_blank" ')
 						// .replace(/<header(\s[^>]+)*>(.|[\r\n])*?<\/header>/g, '')
