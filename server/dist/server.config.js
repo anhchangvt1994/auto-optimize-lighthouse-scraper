@@ -25,7 +25,11 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 							.replace(/="js-/g, '="')
 							.replace(/\sjs-/g, ' ')
 							.replace(
-								/<\/head>/,
+								/(<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*>(.|[\r\n])*?<\/script>|<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*\/>)/g,
+								''
+							)
+							.replace(
+								'</head>',
 								`
                   <meta name="robots" content="noindex,nofollow">
                   <style type="text/css">
@@ -128,7 +132,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                       display: none !important;
                     }
                   </style>
-                </head>
+                </.head>
               `
 							)
 							.replace(
@@ -140,7 +144,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 								'"https://github.com/anhchangvt1994'
 							)
 							.replace(
-								/<link\s+(?=.*(rel=["']?(manifest|search)["']?).*?(\/|)?)(?:.*?\/?>)/g,
+								/<link\s+(?=.*(rel=["']?(manifest|search)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(name=["']?(turbo-cache-control|route-pattern|route-controller|route-action|current-catalog-service-hash|request-id|github-keyboard-shortcuts|selected-link|google-site-verification|octolytics-url|user-login|fb:app_id|apple-itunes-app|hostname|expected-hostname|octolytics-dimension-user_id|turbo-body-classes|browser-stats-url|browser-errors-url)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(http-equiv=["']?(x-pjax(-csp-|-css-|-js-|-)version|Content-Security-Policy)["']?).*?(\/|)?)(?:.*?\/?>)/g,
 								''
 							)
 							.replace(

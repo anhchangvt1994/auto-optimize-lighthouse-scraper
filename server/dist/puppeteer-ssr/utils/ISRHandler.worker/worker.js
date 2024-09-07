@@ -646,15 +646,7 @@ const ISRHandler = async (params) => {
 		const enableToCompress = (() => {
 			const options = _nullishCoalesce(
 				_nullishCoalesce(
-					_optionalChain([
-						_serverconfig2.default,
-						'access',
-						(_64) => _64.crawl,
-						'access',
-						(_65) => _65.custom,
-						'optionalCall',
-						(_66) => _66(url),
-					]),
+					crawlCustomOption,
 					() => _serverconfig2.default.crawl.routes[pathname]
 				),
 				() => _serverconfig2.default.crawl

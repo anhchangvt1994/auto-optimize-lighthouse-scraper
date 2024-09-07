@@ -412,7 +412,7 @@ const ISRHandler = async (params: IISRHandlerParam) => {
 
 		const enableToCompress = (() => {
 			const options =
-				ServerConfig.crawl.custom?.(url) ??
+				crawlCustomOption ??
 				ServerConfig.crawl.routes[pathname] ??
 				ServerConfig.crawl
 
