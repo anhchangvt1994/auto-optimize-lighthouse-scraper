@@ -31,7 +31,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 							.replace(
 								'</head>',
 								`
-                  <meta name="robots" content="noindex,nofollow">
+                  <!--<meta name="robots" content="noindex,nofollow">-->
                   <style type="text/css">
                     body {
                       padding: 0 0 24px;
