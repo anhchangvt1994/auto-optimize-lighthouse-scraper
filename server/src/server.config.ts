@@ -146,6 +146,14 @@ const ServerConfig = defineServerConfig({
 								''
 							)
 							.replace(
+								'<meta property="og:url" content="https://github.com/anhchangvt1994">',
+								'<meta property="og:url" content="https://anhchangvt1994.site">'
+							)
+							.replace(
+								'<link rel="canonical" href="https://github.com/anhchangvt1994" data-turbo-transient="">',
+								'<link rel="canonical" href="https://anhchangvt1994.site" data-turbo-transient="">'
+							)
+							.replace(
 								/https:\/\/github.githubassets.com\/favicons\/favicon.png|https:\/\/github.githubassets.com\/favicons\/favicon.svg|https:\/\/github.githubassets.com\/assets\/pinned-octocat-093da3e6fa40.svg|https:\/\/github.com\/fluidicon.png/g,
 								'/images/anhchangvt1994-avatar-rounded-v1.svg'
 							)
