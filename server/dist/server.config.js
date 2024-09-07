@@ -17,17 +17,25 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 					enable: true,
 					compress: false,
 					optimize: false,
+
 					onContentCrawled: (payload) => {
 						if (!payload.html) return ''
 
 						const tmpHtml = payload.html
+							.replace(/="js-/g, '="')
+							.replace(/\sjs-/g, ' ')
 							.replace(
 								/<\/head>/,
 								`
                   <meta name="robots" content="noindex,nofollow">
-                  <style>
+                  <style type="text/css">
                     body {
-                      padding-top: 24px;
+                      padding: 0 0 24px;
+                    }
+                    @media (min-width: 768px) {
+                      body {
+                        padding: 24px 0 32px;
+                      }
                     }
                     header {
                       display: none !important;
@@ -38,7 +46,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                       }
                     }
                     .user-profile-sticky-bar {
-                      display: none
+                      display: none !important;
                     }
 
                     div[itemtype="http://schema.org/Person"].mt-md-n5 {
@@ -56,28 +64,76 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                     .UnderlineNav {
                       display: none !important;
                     }
+                    h1.vcard-names {
+                      text-align: center !important;
+                    }
                     #user-profile-frame .text-mono {
                       display: none !important;
                     }
-                    #js-contribution-activity {
+                    #contribution-activity {
                       display: none !important;
                     }
                     #year-list-container {
                       display: none !important;
                     }
-                    .js-profile-editable-replace > div:nth-child(6) {
+                    #user-activity-overview {
                       display: none !important;
                     }
-                    .js-profile-editable-replace > button {
+                    .position-relative div:nth-child(3) .col-12 {
+                      width: 100% !important;
+                    }
+                    .position-relative div:nth-child(3) .col-12 .calendar-graph > div:nth-child(1) {
+                      margin: auto !important;
+                    }
+                    .profile-editable-replace > div:nth-child(1) {
+                      display: block !important;
+                      text-align: center;
+                      margin-bottom: 0 !important;
+                    }
+                    .profile-editable-replace > div:nth-child(1) > div:nth-child(1) {
+                      margin-right: 0 !important;
+                    }
+                    .profile-editable-replace > div:nth-child(2) {
+                      margin-top: 0 !important;
+                    }
+                    .profile-editable-replace > div:nth-child(2) div[data-team-hovercards-enabled] {
+                      justify-content: center;
+                    }
+                    .profile-editable-replace > div:nth-child(3) {
+                      text-align: center !important;
+                    }
+                    .profile-editable-replace > div:nth-child(4) {
+                      text-align: center !important;
+                    }
+                    .profile-editable-replace > div:nth-child(4) > .d-flex {
+                      justify-content: center !important;
+                    }
+                    .profile-editable-replace > div:nth-child(5) {
+                      text-align: center !important;
+                    }
+                    .profile-editable-replace > div:nth-child(5) > .d-flex {
+                      justify-content: center !important;
+                    }
+                    .profile-editable-replace > div:nth-child(6) {
+                      display: none !important;
+                    }
+                    .profile-editable-replace > button {
                       display: none !important;
                     }
                     a.anchor {
                       outline: none;
                       user-select: none;
                     }
+                    footer {
+                      display: none !important;
+                    }
                   </style>
                 </head>
               `
+							)
+							.replace(
+								'width=device-width',
+								'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
 							)
 							.replace(
 								/\"\/anhchangvt1994/g,
@@ -92,12 +148,6 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 								'/images/anhchangvt1994-avatar-rounded-v1.svg'
 							)
 							.replace(/<a\s/g, '<a target="_blank" ')
-						// .replace(/<header(\s[^>]+)*>(.|[\r\n])*?<\/header>/g, '')
-						// .replace(
-						// 	/<x-banner(\s[^>]+)*>(.|[\r\n])*?<\/x-banner>(.|[\r\n])*?<div(\s[^>]+)*>(.|[\r\n])*?<\/div>|<div class="user-profile-sticky-bar js-user-profile-sticky-bar d-none d-md-block is-follow-stuck is-stuck">(.|[\r\n])*?<\/div>|<div class="UnderlineNav width-full box-shadow-none js-responsive-underlinenav overflow-md-x-hidden">(.|[\r\n])*?<\/div>/g,
-						// 	''
-						// )
-						// .replace(/<a\s/g, '<a target="_blank" ')
 
 						return tmpHtml
 					},
