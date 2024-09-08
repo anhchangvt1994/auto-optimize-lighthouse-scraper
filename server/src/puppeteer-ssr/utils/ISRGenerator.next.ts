@@ -97,10 +97,10 @@ const SSRGenerator = async ({
 
 	const certainLimitRequestToCrawl = getCertainLimitRequestToCrawl()
 
-	console.log(result)
-	console.log('certainLimitRequestToCrawl: ', certainLimitRequestToCrawl)
-	console.log('totalRequestsToCrawl: ', totalRequestsToCrawl)
-	console.log('totalRequestsForceToCrawl: ', totalRequestsForceToCrawl)
+	// console.log(result)
+	// console.log('certainLimitRequestToCrawl: ', certainLimitRequestToCrawl)
+	// console.log('totalRequestsToCrawl: ', totalRequestsToCrawl)
+	// console.log('totalRequestsForceToCrawl: ', totalRequestsForceToCrawl)
 
 	if (result) {
 		const NonNullableResult = result
