@@ -66,9 +66,7 @@ _pm22.default.connect(false, (err) => {
 					name: 'puppeteer-ssr',
 					script: `server/${_constants.resourceDirectory}/index.uws.worker.${_constants.resourceExtension}`,
 					instances: CLUSTER_INSTANCES,
-					node_args: '--max-old-space-size=1024',
-					args: '--max-old-space-size=1024',
-					max_memory_restart: '500',
+					max_memory_restart: '1536',
 					exec_mode: 'cluster',
 					interpreter:
 						_constants.resourceExtension === 'ts'
