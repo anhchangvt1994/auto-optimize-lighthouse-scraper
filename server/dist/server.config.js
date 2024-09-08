@@ -22,8 +22,6 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 						if (!payload.html) return ''
 
 						const tmpHtml = payload.html
-							.replace(/="js-/g, '="')
-							.replace(/\sjs-/g, ' ')
 							.replace(
 								/(<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*>(.|[\r\n])*?<\/script>|<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*\/>)/g,
 								''
@@ -31,7 +29,6 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 							.replace(
 								'</head>',
 								`
-                  <!--<meta name="robots" content="noindex,nofollow">-->
                   <style type="text/css">
                     body {
                       padding: 0 0 24px;
@@ -74,7 +71,7 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                     #user-profile-frame .text-mono {
                       display: none !important;
                     }
-                    #contribution-activity {
+                    #js-contribution-activity {
                       display: none !important;
                     }
                     #year-list-container {
@@ -89,39 +86,39 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                     .position-relative div:nth-child(3) .col-12 .calendar-graph > div:nth-child(1) {
                       margin: auto !important;
                     }
-                    .profile-editable-replace > div:nth-child(1) {
+                    .js-profile-editable-replace > div:nth-child(1) {
                       display: block !important;
                       text-align: center;
                       margin-bottom: 0 !important;
                     }
-                    .profile-editable-replace > div:nth-child(1) > div:nth-child(1) {
+                    .js-profile-editable-replace > div:nth-child(1) > div:nth-child(1) {
                       margin-right: 0 !important;
                     }
-                    .profile-editable-replace > div:nth-child(2) {
+                    .js-profile-editable-replace > div:nth-child(2) {
                       margin-top: 0 !important;
                     }
-                    .profile-editable-replace > div:nth-child(2) div[data-team-hovercards-enabled] {
+                    .js-profile-editable-replace > div:nth-child(2) div[data-team-hovercards-enabled] {
                       justify-content: center;
                     }
-                    .profile-editable-replace > div:nth-child(3) {
+                    .js-profile-editable-replace > div:nth-child(3) {
                       text-align: center !important;
                     }
-                    .profile-editable-replace > div:nth-child(4) {
+                    .js-profile-editable-replace > div:nth-child(4) {
                       text-align: center !important;
                     }
-                    .profile-editable-replace > div:nth-child(4) > .d-flex {
+                    .js-profile-editable-replace > div:nth-child(4) > .d-flex {
                       justify-content: center !important;
                     }
-                    .profile-editable-replace > div:nth-child(5) {
+                    .js-profile-editable-replace > div:nth-child(5) {
                       text-align: center !important;
                     }
-                    .profile-editable-replace > div:nth-child(5) > .d-flex {
+                    .js-profile-editable-replace > div:nth-child(5) > .d-flex {
                       justify-content: center !important;
                     }
-                    .profile-editable-replace > div:nth-child(6) {
+                    .js-profile-editable-replace > div:nth-child(6) {
                       display: none !important;
                     }
-                    .profile-editable-replace > button {
+                    .js-profile-editable-replace > button {
                       display: none !important;
                     }
                     a.anchor {
@@ -132,20 +129,12 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
                       display: none !important;
                     }
                   </style>
-                </.head>
+                </head>
               `
 							)
 							.replace(
 								'width=device-width',
 								'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
-							)
-							.replace(
-								/\"\/anhchangvt1994/g,
-								'"https://github.com/anhchangvt1994'
-							)
-							.replace(
-								/<link\s+(?=.*(rel=["']?(manifest|search)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(name=["']?(turbo-cache-control|route-pattern|route-controller|route-action|current-catalog-service-hash|request-id|github-keyboard-shortcuts|selected-link|google-site-verification|octolytics-url|user-login|fb:app_id|apple-itunes-app|hostname|expected-hostname|octolytics-dimension-user_id|turbo-body-classes|browser-stats-url|browser-errors-url)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(http-equiv=["']?(x-pjax(-csp-|-css-|-js-|-)version|Content-Security-Policy)["']?).*?(\/|)?)(?:.*?\/?>)/g,
-								''
 							)
 							.replace(
 								'<meta property="og:url" content="https://github.com/anhchangvt1994">',
@@ -154,6 +143,14 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 							.replace(
 								'<link rel="canonical" href="https://github.com/anhchangvt1994" data-turbo-transient="">',
 								'<link rel="canonical" href="https://anhchangvt1994.site" data-turbo-transient="">'
+							)
+							.replace(
+								/\"\/anhchangvt1994/g,
+								'"https://github.com/anhchangvt1994'
+							)
+							.replace(
+								/<link\s+(?=.*(rel=["']?(manifest|search)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(name=["']?(turbo-cache-control|route-pattern|route-controller|route-action|current-catalog-service-hash|request-id|github-keyboard-shortcuts|selected-link|google-site-verification|octolytics-url|user-login|fb:app_id|apple-itunes-app|hostname|expected-hostname|octolytics-dimension-user_id|turbo-body-classes|browser-stats-url|browser-errors-url)["']?).*?(\/|)?)(?:.*?\/?>)|<meta\s+(?=.*(http-equiv=["']?(x-pjax(-csp-|-css-|-js-|-)version|Content-Security-Policy)["']?).*?(\/|)?)(?:.*?\/?>)/g,
+								''
 							)
 							.replace(
 								/https:\/\/github.githubassets.com\/favicons\/favicon.png|https:\/\/github.githubassets.com\/favicons\/favicon.svg|https:\/\/github.githubassets.com\/assets\/pinned-octocat-093da3e6fa40.svg|https:\/\/github.com\/fluidicon.png/g,
