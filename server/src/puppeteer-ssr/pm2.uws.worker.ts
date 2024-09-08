@@ -58,7 +58,9 @@ pm2.connect(false, (err) => {
 					name: 'puppeteer-ssr',
 					script: `server/${resourceDirectory}/index.uws.worker.${resourceExtension}`,
 					instances: CLUSTER_INSTANCES,
-					max_memory_restart: '1536',
+					node_args: '--max-old-space-size=500',
+					args: '--max-old-space-size=500',
+					max_memory_restart: '320',
 					exec_mode: 'cluster',
 					interpreter:
 						resourceExtension === 'ts' ? './node_modules/.bin/sucrase' : 'node',
