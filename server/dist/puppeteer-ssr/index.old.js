@@ -1,37 +1,71 @@
-import { Express } from 'express'
-import fs from 'fs'
-import path from 'path'
-import { brotliCompressSync, brotliDecompressSync, gzipSync } from 'zlib'
-import {
-	getData as getDataCache,
-	getStore as getStoreCache,
-} from '../api/utils/CacheManager/utils'
-import { SERVER_LESS } from '../constants'
-import ServerConfig from '../server.config'
-import { IBotInfo } from '../types'
-import CleanerService from '../utils/CleanerService'
-import Console from '../utils/ConsoleHandler'
-import { getCookieFromResponse, setCookie } from '../utils/CookieHandler'
-import { ENV_MODE } from '../utils/InitEnv'
-import { hashCode } from '../utils/StringHelper'
-import { CACHEABLE_STATUS_CODE } from './constants'
-import { convertUrlHeaderToQueryString, getUrl } from './utils/ForamatUrl'
-import ISRGenerator from './utils/ISRGenerator.next'
-import SSRHandler from './utils/ISRHandler.worker'
+'use strict'
+Object.defineProperty(exports, '__esModule', { value: true })
+function _interopRequireDefault(obj) {
+	return obj && obj.__esModule ? obj : { default: obj }
+}
+function _optionalChain(ops) {
+	let lastAccessLHS = undefined
+	let value = ops[0]
+	let i = 1
+	while (i < ops.length) {
+		const op = ops[i]
+		const fn = ops[i + 1]
+		i += 2
+		if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) {
+			return undefined
+		}
+		if (op === 'access' || op === 'optionalAccess') {
+			lastAccessLHS = value
+			value = fn(value)
+		} else if (op === 'call' || op === 'optionalCall') {
+			value = fn((...args) => value.call(lastAccessLHS, ...args))
+			lastAccessLHS = undefined
+		}
+	}
+	return value
+}
+var _fs = require('fs')
+var _fs2 = _interopRequireDefault(_fs)
+var _path = require('path')
+var _path2 = _interopRequireDefault(_path)
+var _zlib = require('zlib')
+
+var _utils = require('../api/utils/CacheManager/utils')
+var _constants = require('../constants')
+var _serverconfig = require('../server.config')
+var _serverconfig2 = _interopRequireDefault(_serverconfig)
+
+var _CleanerService = require('../utils/CleanerService')
+var _CleanerService2 = _interopRequireDefault(_CleanerService)
+var _ConsoleHandler = require('../utils/ConsoleHandler')
+var _ConsoleHandler2 = _interopRequireDefault(_ConsoleHandler)
+var _CookieHandler = require('../utils/CookieHandler')
+var _InitEnv = require('../utils/InitEnv')
+var _StringHelper = require('../utils/StringHelper')
+var _constants3 = require('./constants')
+var _ForamatUrl = require('./utils/ForamatUrl')
+var _ISRGeneratornext = require('./utils/ISRGenerator.next')
+var _ISRGeneratornext2 = _interopRequireDefault(_ISRGeneratornext)
+var _ISRHandlerworker = require('./utils/ISRHandler.worker')
+var _ISRHandlerworker2 = _interopRequireDefault(_ISRHandlerworker)
 
 const _resetCookie = (res) => {
-	setCookie(res, `BotInfo=;Max-Age=0;Path=/`)
-	setCookie(res, `EnvironmentInfo=;Max-Age=0;Path=/`)
-	setCookie(res, `DeviceInfo=;Max-Age=0;Path=/`)
+	_CookieHandler.setCookie.call(void 0, res, `BotInfo=;Max-Age=0;Path=/`)
+	_CookieHandler.setCookie.call(
+		void 0,
+		res,
+		`EnvironmentInfo=;Max-Age=0;Path=/`
+	)
+	_CookieHandler.setCookie.call(void 0, res, `DeviceInfo=;Max-Age=0;Path=/`)
 } // _resetCookie
 
 const puppeteerSSRService = (async () => {
-	let _app: Express
+	let _app
 	const webScrapingService = 'web-scraping-service'
 	const cleanerService = 'cleaner-service'
 
 	const _allRequestHandler = () => {
-		if (SERVER_LESS) {
+		if (_constants.SERVER_LESS) {
 			_app
 				.get('/web-scraping', async function (req, res) {
 					if (req.headers.authorization !== webScrapingService)
@@ -43,11 +77,9 @@ const puppeteerSSRService = (async () => {
 
 					const startGenerating = Number(req.query.startGenerating)
 					const isFirstRequest = !!req.query.isFirstRequest
-					const url = req.query.url
-						? (decodeURIComponent(req.query.url as string) as string)
-						: ''
+					const url = req.query.url ? decodeURIComponent(req.query.url) : ''
 
-					const result = await SSRHandler({
+					const result = await _ISRHandlerworker2.default.call(void 0, {
 						startGenerating,
 						hasCache: isFirstRequest,
 						url,
@@ -62,31 +94,54 @@ const puppeteerSSRService = (async () => {
 							.send(
 								'Welcome to MTr Cleaner Service, please provide authorization to use it.'
 							)
-					else if (!SERVER_LESS)
+					else if (!_constants.SERVER_LESS)
 						return res
 							.status(200)
 							.send(
 								'MTr cleaner service can not run in none serverless environment'
 							)
 
-					await CleanerService(true)
+					await _CleanerService2.default.call(void 0, true)
 
-					Console.log('Finish clean service!')
+					_ConsoleHandler2.default.log('Finish clean service!')
 
 					res.status(200).send('Finish clean service!')
 				})
 		}
 		_app.get('*', async function (req, res, next) {
-			const pathname = req.url?.split('?')[0]
-			const cookies = getCookieFromResponse(res)
-			const botInfo: IBotInfo = cookies?.['BotInfo']
+			const pathname = _optionalChain([
+				req,
+				'access',
+				(_) => _.url,
+				'optionalAccess',
+				(_2) => _2.split,
+				'call',
+				(_3) => _3('?'),
+				'access',
+				(_4) => _4[0],
+			])
+			const cookies = _CookieHandler.getCookieFromResponse.call(void 0, res)
+			const botInfo = _optionalChain([
+				cookies,
+				'optionalAccess',
+				(_5) => _5['BotInfo'],
+			])
 			const { enableToCrawl, enableToCache } = (() => {
-				let enableToCrawl = ServerConfig.crawl.enable
-				let enableToCache = enableToCrawl && ServerConfig.crawl.cache.enable
+				let enableToCrawl = _serverconfig2.default.crawl.enable
+				let enableToCache =
+					enableToCrawl && _serverconfig2.default.crawl.cache.enable
 
 				const crawlOptionPerRoute =
-					ServerConfig.crawl.routes[pathname] ||
-					ServerConfig.crawl.custom?.(pathname)
+					_serverconfig2.default.crawl.routes[pathname] ||
+					_optionalChain([
+						_serverconfig2.default,
+						'access',
+						(_6) => _6.crawl,
+						'access',
+						(_7) => _7.custom,
+						'optionalCall',
+						(_8) => _8(pathname),
+					])
 
 				if (crawlOptionPerRoute) {
 					enableToCrawl = crawlOptionPerRoute.enable
@@ -104,14 +159,20 @@ const puppeteerSSRService = (async () => {
 				const tmpHeaderAcceptEncoding = headers['accept-encoding'] || ''
 				if (tmpHeaderAcceptEncoding.indexOf('br') !== -1) return 'br'
 				else if (tmpHeaderAcceptEncoding.indexOf('gzip') !== -1) return 'gzip'
-				return '' as 'br' | 'gzip' | ''
+				return ''
 			})()
 
-			Console.log('<---puppeteer/index.ts--->')
-			Console.log('enableContentEncoding: ', enableContentEncoding)
-			Console.log(`headers['accept-encoding']: `, headers['accept-encoding'])
-			Console.log('contentEncoding: ', contentEncoding)
-			Console.log('<---puppeteer/index.ts--->')
+			_ConsoleHandler2.default.log('<---puppeteer/index.ts--->')
+			_ConsoleHandler2.default.log(
+				'enableContentEncoding: ',
+				enableContentEncoding
+			)
+			_ConsoleHandler2.default.log(
+				`headers['accept-encoding']: `,
+				headers['accept-encoding']
+			)
+			_ConsoleHandler2.default.log('contentEncoding: ', contentEncoding)
+			_ConsoleHandler2.default.log('<---puppeteer/index.ts--->')
 
 			res.set({
 				'Content-Type':
@@ -121,28 +182,30 @@ const puppeteerSSRService = (async () => {
 			})
 
 			if (
-				ServerConfig.isRemoteCrawler &&
-				((ServerConfig.crawlerSecretKey &&
-					req.query.crawlerSecretKey !== ServerConfig.crawlerSecretKey) ||
+				_serverconfig2.default.isRemoteCrawler &&
+				((_serverconfig2.default.crawlerSecretKey &&
+					req.query.crawlerSecretKey !==
+						_serverconfig2.default.crawlerSecretKey) ||
 					(!botInfo.isBot && enableToCache))
 			) {
 				return res.status(403).send('403 Forbidden')
 			}
 
 			if (
-				ENV_MODE !== 'development' &&
+				_InitEnv.ENV_MODE !== 'development' &&
 				enableToCrawl &&
 				req.headers.service !== 'puppeteer'
 			) {
-				const url = convertUrlHeaderToQueryString(
-					getUrl(req),
+				const url = _ForamatUrl.convertUrlHeaderToQueryString.call(
+					void 0,
+					_ForamatUrl.getUrl.call(void 0, req),
 					res,
 					!botInfo.isBot
 				)
 
 				if (!req.headers['redirect'] && botInfo.isBot) {
 					try {
-						const result = await ISRGenerator({
+						const result = await _ISRGeneratornext2.default.call(void 0, {
 							url,
 						})
 
@@ -173,43 +236,47 @@ const puppeteerSSRService = (async () => {
 						}
 
 						if (
-							(CACHEABLE_STATUS_CODE[result.status] || result.status === 503) &&
+							(_constants3.CACHEABLE_STATUS_CODE[result.status] ||
+								result.status === 503) &&
 							result.response
 						) {
 							const body = (() => {
-								let tmpBody: string | Buffer = ''
+								let tmpBody = ''
 
 								if (enableContentEncoding) {
 									tmpBody = result.html
 										? contentEncoding === 'br'
-											? brotliCompressSync(result.html)
+											? _zlib.brotliCompressSync.call(void 0, result.html)
 											: contentEncoding === 'gzip'
-											? gzipSync(result.html)
+											? _zlib.gzipSync.call(void 0, result.html)
 											: result.html
 										: (() => {
-												let tmpContent: Buffer | string = fs.readFileSync(
+												let tmpContent = _fs2.default.readFileSync(
 													result.response
 												)
 
 												if (contentEncoding === 'br') return tmpContent
 												else if (tmpContent && Buffer.isBuffer(tmpContent))
-													tmpContent =
-														brotliDecompressSync(tmpContent).toString()
+													tmpContent = _zlib.brotliDecompressSync
+														.call(void 0, tmpContent)
+														.toString()
 
 												if (result.status === 200) {
 													if (contentEncoding === 'gzip')
-														tmpContent = gzipSync(tmpContent)
+														tmpContent = _zlib.gzipSync.call(void 0, tmpContent)
 												}
 
 												return tmpContent
 										  })()
 								} else if (result.response.indexOf('.br') !== -1) {
-									const content = fs.readFileSync(result.response)
+									const content = _fs2.default.readFileSync(result.response)
 
 									if (content && Buffer.isBuffer(content))
-										tmpBody = brotliDecompressSync(content).toString()
+										tmpBody = _zlib.brotliDecompressSync
+											.call(void 0, content)
+											.toString()
 								} else {
-									tmpBody = fs.readFileSync(result.response)
+									tmpBody = _fs2.default.readFileSync(result.response)
 								}
 
 								return tmpBody
@@ -224,11 +291,11 @@ const puppeteerSSRService = (async () => {
 								if (enableContentEncoding) {
 									tmpBody = result.html
 										? contentEncoding === 'br'
-											? brotliCompressSync(result.html)
+											? _zlib.brotliCompressSync.call(void 0, result.html)
 											: contentEncoding === 'gzip'
-											? gzipSync(result.html)
+											? _zlib.gzipSync.call(void 0, result.html)
 											: result.html
-										: fs.readFileSync(result.response)
+										: _fs2.default.readFileSync(result.response)
 								}
 
 								tmpBody = result.html || `${result.status} Error`
@@ -238,28 +305,28 @@ const puppeteerSSRService = (async () => {
 							res.status(result.status).send(body) // Serve prerendered page as response.
 						}
 					} catch (err) {
-						Console.error('url', url)
-						Console.error(err)
+						_ConsoleHandler2.default.error('url', url)
+						_ConsoleHandler2.default.error(err)
 						next(err)
 					}
 
 					return
 				} else if (!botInfo.isBot && enableToCache) {
 					try {
-						if (SERVER_LESS) {
-							await ISRGenerator({
+						if (_constants.SERVER_LESS) {
+							await _ISRGeneratornext2.default.call(void 0, {
 								url,
 								isSkipWaiting: true,
 							})
 						} else {
-							ISRGenerator({
+							_ISRGeneratornext2.default.call(void 0, {
 								url,
 								isSkipWaiting: true,
 							})
 						}
 					} catch (err) {
-						Console.error('url', url)
-						Console.error(err)
+						_ConsoleHandler2.default.error('url', url)
+						_ConsoleHandler2.default.error(err)
 					}
 				}
 			}
@@ -279,35 +346,42 @@ const puppeteerSSRService = (async () => {
 					})
 					.send(
 						req.headers['redirect']
-							? JSON.parse(req.headers['redirect'] as string)
+							? JSON.parse(req.headers['redirect'])
 							: { status: 200, originPath: pathname, path: pathname }
 					)
 			} else {
 				const filePath =
-					(req.headers['static-html-path'] as string) ||
-					path.resolve(__dirname, '../../../dist/index.html')
+					req.headers['static-html-path'] ||
+					_path2.default.resolve(__dirname, '../../../dist/index.html')
 
 				const apiStoreData = await (async () => {
 					let tmpStoreKey
 					let tmpAPIStore
 
-					tmpStoreKey = hashCode(req.url)
+					tmpStoreKey = _StringHelper.hashCode.call(void 0, req.url)
 
-					tmpAPIStore = await getStoreCache(tmpStoreKey)
+					tmpAPIStore = await _utils.getStore.call(void 0, tmpStoreKey)
 
 					if (tmpAPIStore) return tmpAPIStore.data
 
-					const cookies = getCookieFromResponse(res)
-					const deviceType = cookies?.['DeviceInfo']?.['type']
+					const cookies = _CookieHandler.getCookieFromResponse.call(void 0, res)
+					const deviceType = _optionalChain([
+						cookies,
+						'optionalAccess',
+						(_9) => _9['DeviceInfo'],
+						'optionalAccess',
+						(_10) => _10['type'],
+					])
 
-					tmpStoreKey = hashCode(
+					tmpStoreKey = _StringHelper.hashCode.call(
+						void 0,
 						`${req.url}${
 							req.url.includes('?') && deviceType
 								? '&device=' + deviceType
 								: '?device=' + deviceType
 						}`
 					)
-					tmpAPIStore = await getStoreCache(tmpStoreKey)
+					tmpAPIStore = await _utils.getStore.call(void 0, tmpStoreKey)
 
 					if (tmpAPIStore) return tmpAPIStore.data
 
@@ -319,7 +393,7 @@ const puppeteerSSRService = (async () => {
 				if (apiStoreData) {
 					if (apiStoreData.length) {
 						for (const cacheKey of apiStoreData) {
-							const apiCache = await getDataCache(cacheKey)
+							const apiCache = await _utils.getData.call(void 0, cacheKey)
 							if (!apiCache || !apiCache.cache || apiCache.cache.status !== 200)
 								continue
 
@@ -328,23 +402,23 @@ const puppeteerSSRService = (async () => {
 					}
 				}
 
-				let html = fs.readFileSync(filePath, 'utf8') || ''
+				let html = _fs2.default.readFileSync(filePath, 'utf8') || ''
 
-				// html = html.replace(
-				// 	'</head>',
-				// 	`<script>window.API_STORE = ${JSON.stringify(
-				// 		WindowAPIStore
-				// 	)}</script></head>`
-				// )
+				html = html.replace(
+					'</head>',
+					`<script>window.API_STORE = ${JSON.stringify(
+						WindowAPIStore
+					)}</script></head>`
+				)
 
 				const body = (() => {
 					if (!enableContentEncoding) return html
 
 					switch (true) {
 						case contentEncoding === 'br':
-							return brotliCompressSync(html)
+							return _zlib.brotliCompressSync.call(void 0, html)
 						case contentEncoding === 'gzip':
-							return gzipSync(html)
+							return _zlib.gzipSync.call(void 0, html)
 						default:
 							return html
 					}
@@ -368,18 +442,19 @@ const puppeteerSSRService = (async () => {
 
 		// Hàm middleware xử lý lỗi cuối cùng
 		_app.use(function (err, req, res, next) {
-			Console.error(err.stack)
+			_ConsoleHandler2.default.error(err.stack)
 			res.status(504).send('504 Gateway Timeout')
 		})
 	}
 
 	return {
-		init(app: Express) {
-			if (!app) return Console.warn('You need provide express app!')
+		init(app) {
+			if (!app)
+				return _ConsoleHandler2.default.warn('You need provide express app!')
 			_app = app
 			_allRequestHandler()
 		},
 	}
 })()
 
-export default puppeteerSSRService
+exports.default = puppeteerSSRService

@@ -122,16 +122,14 @@ const CleanerService = async (force = false) => {
 		})
 
 		if (!SERVER_LESS) {
-			const cacheTimeHour = ServerConfig.crawl.cache.time / 3600
-
 			setTimeout(() => {
-				cleanPages(cacheTimeHour)
-			}, 21600000)
+				cleanPages(ServerConfig.crawl.cache.time)
+			}, ServerConfig.crawl.cache.time)
 		}
 	}
 
 	if (process.env.MODE === 'development') cleanPages(0)
-	else cleanPages(360)
+	else cleanPages(ServerConfig.crawl.cache.time)
 
 	// NOTE - API Data Cache Cleaner
 	const cleanAPIDataCache = async () => {

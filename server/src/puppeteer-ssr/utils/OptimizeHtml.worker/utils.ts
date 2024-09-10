@@ -3,7 +3,6 @@ import { brotliDecompressSync } from 'zlib'
 import { POWER_LEVEL, POWER_LEVEL_LIST } from '../../../constants'
 import { ENV, PROCESS_ENV } from '../../../utils/InitEnv'
 import {
-	regexAlwaysRemoveTag,
 	regexFullOptimizeBody,
 	regexHalfOptimizeBody,
 	regexHandleAttrsHtmlTag,
@@ -208,90 +207,86 @@ export const optimizeContent = async (
 } // optimizeContent
 
 export const shallowOptimizeContent = async (html: string) => {
-	if (!html) return html
+	if (!html || PROCESS_ENV.DISABLE_OPTIMIZE) return html
 
 	if (Buffer.isBuffer(html)) html = brotliDecompressSync(html).toString()
 
-	if (PROCESS_ENV.DISABLE_OPTIMIZE) {
-		html = html.replace(regexAlwaysRemoveTag, '')
-	} else {
-		html = html
-			.replace(regexRemoveScriptTag, '')
-			.replace(regexRemoveSpecialTag, '')
-			.replace(regexRemoveIconTagFirst, '')
-			.replace(regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
-				let newAttrs = curAttrs
+	html = html
+		.replace(regexRemoveScriptTag, '')
+		.replace(regexRemoveSpecialTag, '')
+		.replace(regexRemoveIconTagFirst, '')
+		.replace(regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
+			let newAttrs = curAttrs
 
-				if (!newAttrs.includes('lang')) {
-					newAttrs = `lang="en"`
-				}
+			if (!newAttrs.includes('lang')) {
+				newAttrs = `lang="en"`
+			}
 
-				return `<html ${newAttrs}>`
-			})
-			.replace(regexHandleAttrsImageTag, (match, tag, curAttrs) => {
-				const alt = /alt=("|'|)(?<alt>[^"']+)("|'|)+(\s|$)/g
-					.exec(curAttrs)
-					?.groups?.alt?.trim()
+			return `<html ${newAttrs}>`
+		})
+		.replace(regexHandleAttrsImageTag, (match, tag, curAttrs) => {
+			const alt = /alt=("|'|)(?<alt>[^"']+)("|'|)+(\s|$)/g
+				.exec(curAttrs)
+				?.groups?.alt?.trim()
 
-				if (!alt) return ''
+			if (!alt) return ''
 
-				let newAttrs = (
-					curAttrs.includes('seo-tag')
-						? curAttrs
-						: curAttrs.replace(
-								/(?<srcAttr>(src|srcset))=("|'|)(.*?)("|'|)+(\s|$)/g,
-								'$<srcAttr> '
-						  )
-				).trim()
+			let newAttrs = (
+				curAttrs.includes('seo-tag')
+					? curAttrs
+					: curAttrs.replace(
+							/(?<srcAttr>(src|srcset))=("|'|)(.*?)("|'|)+(\s|$)/g,
+							'$<srcAttr> '
+					  )
+			).trim()
+
+			switch (true) {
+				case !newAttrs.includes('height='):
+					newAttrs = `height="200" ${newAttrs}`
+				case !newAttrs.includes('width='):
+					newAttrs = `width="150" ${newAttrs}`
+				default:
+					break
+			}
+
+			return `<img ${newAttrs}>`
+		})
+		.replace(regexRemoveClassAndStyleAttrs, '')
+		.replace(
+			regexHandleAttrsInteractiveTag,
+			(math, tag, curAttrs, negative, content, endTag) => {
+				let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
+				let newTag = tag
+				let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
+				let tmpContent = content
+				let result
 
 				switch (true) {
-					case !newAttrs.includes('height='):
-						newAttrs = `height="200" ${newAttrs}`
-					case !newAttrs.includes('width='):
-						newAttrs = `width="150" ${newAttrs}`
+					case newTag === 'a' && !curAttrs.includes('href='):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs}`
+						tmpEndTag = 'button'
+						break
+					case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs.replace(
+							/href(\s|$)|href=""/g,
+							''
+						)}`
+						tmpEndTag = 'button'
+						break
 					default:
 						break
 				}
 
-				return `<img ${newAttrs}>`
-			})
-			.replace(regexRemoveClassAndStyleAttrs, '')
-			.replace(
-				regexHandleAttrsInteractiveTag,
-				(math, tag, curAttrs, negative, content, endTag) => {
-					let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
-					let newTag = tag
-					let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
-					let tmpContent = content
-					let result
+				result =
+					result || tmpEndTag
+						? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
+						: `<${newTag} ${negative} ${newAttrs}>`
 
-					switch (true) {
-						case newTag === 'a' && !curAttrs.includes('href='):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs}`
-							tmpEndTag = 'button'
-							break
-						case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs.replace(
-								/href(\s|$)|href=""/g,
-								''
-							)}`
-							tmpEndTag = 'button'
-							break
-						default:
-							break
-					}
-
-					result =
-						result || tmpEndTag
-							? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
-							: `<${newTag} ${negative} ${newAttrs}>`
-
-					return result
-				}
-			)
-	}
+				return result
+			}
+		)
 
 	return html
 } // shallowOptimizeContent

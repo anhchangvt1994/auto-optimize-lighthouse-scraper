@@ -18,7 +18,11 @@ import CleanerService from '../../utils/CleanerService'
 import Console from '../../utils/ConsoleHandler'
 import { ENV, ENV_MODE, MODE, PROCESS_ENV } from '../../utils/InitEnv'
 import { hashCode } from '../../utils/StringHelper'
-import { convertUrlHeaderToQueryString, getUrl } from '../utils/ForamatUrl.uws'
+import {
+	convertUrlHeaderToQueryString,
+	getPathname,
+	getUrl,
+} from '../utils/ForamatUrl.uws'
 import ISRGenerator from '../utils/ISRGenerator.next'
 import ISSRHandler from '../utils/ISRHandler.worker'
 import { handleResultAfterISRGenerator } from './utils'
@@ -290,7 +294,8 @@ const puppeteerSSRService = (async () => {
 			}
 
 			if (!res.writableEnded) {
-				const pointsTo = ServerConfig.routes?.[req.getUrl()].pointsTo
+				const correctPathname = getPathname(res, req)
+				const pointsTo = ServerConfig.routes?.[correctPathname]?.pointsTo
 
 				if (pointsTo) {
 					const url = convertUrlHeaderToQueryString(pointsTo, res, false)

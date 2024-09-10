@@ -227,7 +227,7 @@ const get = async (url, options) => {
 							() => curTime
 						)
 					).getTime() >=
-				42000,
+				38000,
 			isRaw,
 		}
 	}

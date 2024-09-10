@@ -261,103 +261,99 @@ const optimizeContent = async (html, isFullOptimize = false) => {
 exports.optimizeContent = optimizeContent // optimizeContent
 
 const shallowOptimizeContent = async (html) => {
-	if (!html) return html
+	if (!html || _InitEnv.PROCESS_ENV.DISABLE_OPTIMIZE) return html
 
 	if (Buffer.isBuffer(html))
 		html = _zlib.brotliDecompressSync.call(void 0, html).toString()
 
-	if (_InitEnv.PROCESS_ENV.DISABLE_OPTIMIZE) {
-		html = html.replace(_constants3.regexAlwaysRemoveTag, '')
-	} else {
-		html = html
-			.replace(_constants3.regexRemoveScriptTag, '')
-			.replace(_constants3.regexRemoveSpecialTag, '')
-			.replace(_constants3.regexRemoveIconTagFirst, '')
-			.replace(_constants3.regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
-				let newAttrs = curAttrs
+	html = html
+		.replace(_constants3.regexRemoveScriptTag, '')
+		.replace(_constants3.regexRemoveSpecialTag, '')
+		.replace(_constants3.regexRemoveIconTagFirst, '')
+		.replace(_constants3.regexHandleAttrsHtmlTag, (match, tag, curAttrs) => {
+			let newAttrs = curAttrs
 
-				if (!newAttrs.includes('lang')) {
-					newAttrs = `lang="en"`
-				}
+			if (!newAttrs.includes('lang')) {
+				newAttrs = `lang="en"`
+			}
 
-				return `<html ${newAttrs}>`
-			})
-			.replace(_constants3.regexHandleAttrsImageTag, (match, tag, curAttrs) => {
-				const alt = _optionalChain([
-					/alt=("|'|)(?<alt>[^"']+)("|'|)+(\s|$)/g,
-					'access',
-					(_19) => _19.exec,
-					'call',
-					(_20) => _20(curAttrs),
-					'optionalAccess',
-					(_21) => _21.groups,
-					'optionalAccess',
-					(_22) => _22.alt,
-					'optionalAccess',
-					(_23) => _23.trim,
-					'call',
-					(_24) => _24(),
-				])
+			return `<html ${newAttrs}>`
+		})
+		.replace(_constants3.regexHandleAttrsImageTag, (match, tag, curAttrs) => {
+			const alt = _optionalChain([
+				/alt=("|'|)(?<alt>[^"']+)("|'|)+(\s|$)/g,
+				'access',
+				(_19) => _19.exec,
+				'call',
+				(_20) => _20(curAttrs),
+				'optionalAccess',
+				(_21) => _21.groups,
+				'optionalAccess',
+				(_22) => _22.alt,
+				'optionalAccess',
+				(_23) => _23.trim,
+				'call',
+				(_24) => _24(),
+			])
 
-				if (!alt) return ''
+			if (!alt) return ''
 
-				let newAttrs = (
-					curAttrs.includes('seo-tag')
-						? curAttrs
-						: curAttrs.replace(
-								/(?<srcAttr>(src|srcset))=("|'|)(.*?)("|'|)+(\s|$)/g,
-								'$<srcAttr> '
-						  )
-				).trim()
+			let newAttrs = (
+				curAttrs.includes('seo-tag')
+					? curAttrs
+					: curAttrs.replace(
+							/(?<srcAttr>(src|srcset))=("|'|)(.*?)("|'|)+(\s|$)/g,
+							'$<srcAttr> '
+					  )
+			).trim()
+
+			switch (true) {
+				case !newAttrs.includes('height='):
+					newAttrs = `height="200" ${newAttrs}`
+				case !newAttrs.includes('width='):
+					newAttrs = `width="150" ${newAttrs}`
+				default:
+					break
+			}
+
+			return `<img ${newAttrs}>`
+		})
+		.replace(_constants3.regexRemoveClassAndStyleAttrs, '')
+		.replace(
+			_constants3.regexHandleAttrsInteractiveTag,
+			(math, tag, curAttrs, negative, content, endTag) => {
+				let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
+				let newTag = tag
+				let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
+				let tmpContent = content
+				let result
 
 				switch (true) {
-					case !newAttrs.includes('height='):
-						newAttrs = `height="200" ${newAttrs}`
-					case !newAttrs.includes('width='):
-						newAttrs = `width="150" ${newAttrs}`
+					case newTag === 'a' && !curAttrs.includes('href='):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs}`
+						tmpEndTag = 'button'
+						break
+					case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
+						newTag = 'button'
+						newAttrs = `type="button" ${newAttrs.replace(
+							/href(\s|$)|href=""/g,
+							''
+						)}`
+						tmpEndTag = 'button'
+						break
 					default:
 						break
 				}
 
-				return `<img ${newAttrs}>`
-			})
-			.replace(_constants3.regexRemoveClassAndStyleAttrs, '')
-			.replace(
-				_constants3.regexHandleAttrsInteractiveTag,
-				(math, tag, curAttrs, negative, content, endTag) => {
-					let newAttrs = `style="display: inline-block;min-width: 48px;min-height: 48px;" ${curAttrs.trim()}`
-					let newTag = tag
-					let tmpEndTag = tag === 'input' ? '' : endTag === tag ? endTag : tag
-					let tmpContent = content
-					let result
+				result =
+					result || tmpEndTag
+						? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
+						: `<${newTag} ${negative} ${newAttrs}>`
 
-					switch (true) {
-						case newTag === 'a' && !curAttrs.includes('href='):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs}`
-							tmpEndTag = 'button'
-							break
-						case newTag === 'a' && /href(\s|$)|href=""/g.test(curAttrs):
-							newTag = 'button'
-							newAttrs = `type="button" ${newAttrs.replace(
-								/href(\s|$)|href=""/g,
-								''
-							)}`
-							tmpEndTag = 'button'
-							break
-						default:
-							break
-					}
-
-					result =
-						result || tmpEndTag
-							? `<${newTag} ${newAttrs} ${negative}>${tmpContent}</${tmpEndTag}>`
-							: `<${newTag} ${negative} ${newAttrs}>`
-
-					return result
-				}
-			)
-	}
+				return result
+			}
+		)
 
 	return html
 }

@@ -52,6 +52,7 @@ var _ConsoleHandler = require('../../utils/ConsoleHandler')
 var _ConsoleHandler2 = _interopRequireDefault(_ConsoleHandler)
 var _InitEnv = require('../../utils/InitEnv')
 var _StringHelper = require('../../utils/StringHelper')
+
 var _ForamatUrluws = require('../utils/ForamatUrl.uws')
 var _ISRGeneratornext = require('../utils/ISRGenerator.next')
 var _ISRGeneratornext2 = _interopRequireDefault(_ISRGeneratornext)
@@ -354,13 +355,18 @@ const puppeteerSSRService = (async () => {
 			}
 
 			if (!res.writableEnded) {
+				const correctPathname = _ForamatUrluws.getPathname.call(
+					void 0,
+					res,
+					req
+				)
 				const pointsTo = _optionalChain([
 					_serverconfig2.default,
 					'access',
 					(_9) => _9.routes,
 					'optionalAccess',
-					(_10) => _10[req.getUrl()],
-					'access',
+					(_10) => _10[correctPathname],
+					'optionalAccess',
 					(_11) => _11.pointsTo,
 				])
 

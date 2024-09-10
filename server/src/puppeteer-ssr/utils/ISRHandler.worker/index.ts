@@ -59,7 +59,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 				} else {
 					res(undefined)
 				}
-			}, 40000)
+			}, 35000)
 			try {
 				const tmpResult = await pool.exec(
 					'ISRHandler',
@@ -95,7 +95,7 @@ const ISRHandler = async (params: IISRHandlerWorkerParam) => {
 	}
 
 	const url = params.url.split('?')[0]
-	browser.emit('closePage', url)
+	browser?.emit('closePage', url)
 	if (!isMainThread) {
 		parentPort.postMessage({
 			name: 'closePage',

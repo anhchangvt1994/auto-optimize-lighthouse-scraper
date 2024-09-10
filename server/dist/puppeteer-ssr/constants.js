@@ -89,9 +89,6 @@ const defaultBrowserOptions = {
 exports.defaultBrowserOptions = defaultBrowserOptions
 
 // NOTE - Regex Handler
-const regexAlwaysRemoveTag =
-	/(<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*>(.|[\r\n])*?<\/script>|<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*\/>|<iframe\s+(?:[^>]*?\s+)?((src|id)=["']?[^"]*\b((partytown|insider-worker)(?:-[a-z]+)?)\b[^"]*["']|\bvideo\b)?[^>]*>(?:[^<]*|<(?!\/iframe>))*<\/iframe>)/g
-exports.regexAlwaysRemoveTag = regexAlwaysRemoveTag
 const regexRemoveScriptTag =
 	/(<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*>(.|[\r\n])*?<\/script>|<script(?![\s\S]type="application\/(ld\+json|xml|rdf\+xml)")(\s[^>]+)*\/>)/g
 exports.regexRemoveScriptTag = regexRemoveScriptTag

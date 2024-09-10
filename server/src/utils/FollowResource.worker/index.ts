@@ -199,7 +199,10 @@ const scanToCleanBrowsers = async (
 	})
 } // scanToCleanBrowsers
 
-const scanToCleanPages = async (dirPath: string, durationValidToKeep = 1) => {
+const scanToCleanPages = async (
+	dirPath: string,
+	durationValidToKeep = 21600
+) => {
 	await new Promise(async (res) => {
 		if (fs.existsSync(dirPath)) {
 			let counter = 0

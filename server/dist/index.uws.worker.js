@@ -156,22 +156,22 @@ const startServer = async () => {
 			workerData: { order: 1, port: 4040 },
 		})
 		_createWorkerListener(worker1)
-		// const worker2 = new Worker(__filename, {
-		// 	workerData: { order: 2, port: 4041 },
-		// })
-		// _createWorkerListener(worker2)
-		// const worker3 = new Worker(__filename, {
-		// 	workerData: { order: 3, port: 4042 },
-		// })
-		// _createWorkerListener(worker3)
-		// const worker4 = new Worker(__filename, {
-		// 	workerData: { order: 4, port: 4043 },
-		// })
-		// _createWorkerListener(worker4)
-		// const worker5 = new Worker(__filename, {
-		// 	workerData: { order: 5, port: 4044 },
-		// })
-		// _createWorkerListener(worker5)
+		const worker2 = new Worker(__filename, {
+			workerData: { order: 2, port: 4041 },
+		})
+		_createWorkerListener(worker2)
+		const worker3 = new Worker(__filename, {
+			workerData: { order: 3, port: 4042 },
+		})
+		_createWorkerListener(worker3)
+		const worker4 = new Worker(__filename, {
+			workerData: { order: 4, port: 4043 },
+		})
+		_createWorkerListener(worker4)
+		const worker5 = new Worker(__filename, {
+			workerData: { order: 5, port: 4044 },
+		})
+		_createWorkerListener(worker5)
 	} else {
 		const setupCors = (res) => {
 			res
