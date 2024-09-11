@@ -1,1 +1,1 @@
-ws://127.0.0.1:50705/devtools/browser/d634f2c8-6e59-4b63-8b61-f74e2d3a885a
+ws://127.0.0.1:62006/devtools/browser/a393c8cc-94e1-400a-a17c-82776548e2a0

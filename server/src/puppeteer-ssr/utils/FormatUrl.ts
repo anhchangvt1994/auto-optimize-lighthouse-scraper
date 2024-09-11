@@ -59,7 +59,7 @@ export const getUrl = (req) => {
 } // getUrl
 
 export const getPathname = (req) => {
-	if (!req || req.query.urlTesting) return ''
+	if (!req) return ''
 
 	const pathname = (() => {
 		let tmpPathName

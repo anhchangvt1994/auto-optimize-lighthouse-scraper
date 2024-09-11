@@ -49,7 +49,7 @@ export const getUrl = (res: HttpResponse, req: HttpRequest) => {
 } // getUrl
 
 export const getPathname = (res: HttpResponse, req: HttpRequest) => {
-	if (!res || !req || req.getQuery('urlTesting')) return
+	if (!res || !req) return
 
 	return res.urlForCrawler || req.getUrl()
 } // getPathname
