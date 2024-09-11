@@ -8,6 +8,11 @@ const ServerConfig = defineServerConfig({
 				enable: false,
 			},
 		},
+		cache: {
+			enable: true,
+			time: 24 * 3600,
+			renewTime: 3600,
+		},
 	},
 	api: {
 		list: {
