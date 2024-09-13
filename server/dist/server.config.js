@@ -1,6 +1,12 @@
 'use strict'
 Object.defineProperty(exports, '__esModule', { value: true })
+function _interopRequireDefault(obj) {
+	return obj && obj.__esModule ? obj : { default: obj }
+}
+var _path = require('path')
+var _path2 = _interopRequireDefault(_path)
 var _ServerConfigHandler = require('./utils/ServerConfigHandler')
+var _InitEnv = require('./utils/InitEnv')
 
 const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 	crawl: {
@@ -10,11 +16,16 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 				enable: false,
 			},
 		},
+
 		cache: {
 			enable: true,
-			time: 24 * 3600,
+			time: 'infinite',
 			renewTime: 3600,
+			path: _InitEnv.PROCESS_ENV.IS_SERVER
+				? _path2.default.resolve(__dirname, '../../../cache')
+				: '',
 		},
+
 		custom: (url) => {
 			if (url.startsWith('https://github.com')) {
 				return {
@@ -174,11 +185,6 @@ const ServerConfig = _ServerConfigHandler.defineServerConfig.call(void 0, {
 				compress: true,
 				optimize: true,
 			}
-		},
-	},
-	routes: {
-		'/': {
-			pointsTo: 'https://github.com/anhchangvt1994',
 		},
 	},
 	api: {

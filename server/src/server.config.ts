@@ -1,4 +1,6 @@
+import path from 'path'
 import { defineServerConfig } from './utils/ServerConfigHandler'
+import { PROCESS_ENV } from './utils/InitEnv'
 
 const ServerConfig = defineServerConfig({
 	crawl: {
@@ -8,11 +10,16 @@ const ServerConfig = defineServerConfig({
 				enable: false,
 			},
 		},
+
 		cache: {
 			enable: true,
-			time: 24 * 3600,
+			time: 'infinite',
 			renewTime: 3600,
+			path: PROCESS_ENV.IS_SERVER
+				? path.resolve(__dirname, '../../../cache')
+				: '',
 		},
+
 		custom: (url: string) => {
 			if (url.startsWith('https://github.com')) {
 				return {
@@ -172,11 +179,6 @@ const ServerConfig = defineServerConfig({
 				compress: true,
 				optimize: true,
 			}
-		},
-	},
-	routes: {
-		'/': {
-			pointsTo: 'https://github.com/anhchangvt1994',
 		},
 	},
 	api: {
